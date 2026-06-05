@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Update `device_info_plus` to `^13.1.0` and `package_info_plus` to `^10.1.0` (latest stable majors).
+
 ## 0.1.0
 
 Initial release of the LinkForty Flutter SDK.
