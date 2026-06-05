@@ -139,6 +139,7 @@ class LinkForty {
     final response = await sdk._attributionManager!.reportInstall(
       attributionWindowHours: attributionWindowHours,
       deviceId: deviceId,
+      appToken: config.appToken,
     );
 
     if (response.attributed && response.deepLinkData != null) {

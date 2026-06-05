@@ -14,6 +14,15 @@ class LinkFortyConfig {
   /// Sent as Bearer token in Authorization header.
   final String? apiKey;
 
+  /// Public workspace token (LinkForty Cloud).
+  ///
+  /// Sent with install events so the backend can scope attribution to the
+  /// correct workspace instead of relying solely on fingerprint matching.
+  /// Recommended for Cloud; shipped in the app bundle (attribution scoping,
+  /// not a secret). Find it under Workspace Settings → App Token. Omit for
+  /// self-hosted Core.
+  final String? appToken;
+
   /// Enable debug logging.
   ///
   /// Logs network requests, responses, and SDK operations.
@@ -28,13 +37,15 @@ class LinkFortyConfig {
   ///
   /// - [baseURL]: The base URL of your LinkForty instance (e.g., https://go.yourdomain.com).
   /// - [apiKey]: Optional API key for LinkForty Cloud authentication.
+  /// - [appToken]: Optional public workspace token for LinkForty Cloud attribution scoping.
   /// - [debug]: Enable debug logging (default: false).
   /// - [attributionWindowHours]: Attribution window in hours (default: 168 = 7 days).
   ///
-  /// For self-hosted LinkForty Core, omit the apiKey parameter.
+  /// For self-hosted LinkForty Core, omit the apiKey and appToken parameters.
   const LinkFortyConfig({
     required this.baseURL,
     this.apiKey,
+    this.appToken,
     this.debug = false,
     this.attributionWindowHours = 168,
   });
@@ -72,6 +83,7 @@ class LinkFortyConfig {
     return '''LinkFortyConfig(
     baseURL: ${baseURL.toString()},
     apiKey: ${apiKey != null ? '***' : 'null'},
+    appToken: ${appToken != null ? '***' : 'null'},
     debug: $debug,
     attributionWindowHours: $attributionWindowHours
 )''';
@@ -84,6 +96,7 @@ class LinkFortyConfig {
           runtimeType == other.runtimeType &&
           baseURL == other.baseURL &&
           apiKey == other.apiKey &&
+          appToken == other.appToken &&
           debug == other.debug &&
           attributionWindowHours == other.attributionWindowHours;
 
@@ -91,6 +104,7 @@ class LinkFortyConfig {
   int get hashCode =>
       baseURL.hashCode ^
       apiKey.hashCode ^
+      appToken.hashCode ^
       debug.hashCode ^
       attributionWindowHours.hashCode;
 }

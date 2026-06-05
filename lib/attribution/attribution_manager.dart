@@ -49,9 +49,12 @@ class AttributionManager {
   /// Parameters:
   /// - [attributionWindowHours]: The lookback window in hours for matching clicks.
   /// - [deviceId]: An optional persistent device ID (like IDFA or GAID).
+  /// - [appToken]: An optional public workspace token (LinkForty Cloud) so the
+  ///   backend can scope attribution to the correct workspace.
   Future<InstallResponse> reportInstall({
     required int attributionWindowHours,
     String? deviceId,
+    String? appToken,
   }) async {
     final storedInstallId = _storageManager.getInstallId();
     if (storedInstallId != null) {
@@ -73,6 +76,12 @@ class AttributionManager {
       deviceId: deviceId,
     );
 
+    // Attach the workspace token (when provided) so Cloud can scope attribution
+    // to the correct workspace rather than relying solely on fingerprint matching.
+    final body = appToken != null
+        ? {...fingerprint.toJson(), 'appToken': appToken}
+        : fingerprint.toJson();
+
     LinkFortyLogger.log('Reporting install with fingerprint: $fingerprint');
 
     InstallResponse response;
@@ -80,7 +89,7 @@ class AttributionManager {
       response = await _networkManager.request<InstallResponse>(
         endpoint: '/api/sdk/v1/install',
         method: HttpMethod.post,
-        body: fingerprint.toJson(),
+        body: body,
         fromJson: (json) => InstallResponse.fromJson(json),
       );
       LinkFortyLogger.log('Install response: $response');
