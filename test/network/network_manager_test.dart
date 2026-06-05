@@ -4,11 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:forty_link/network/network_manager.dart';
-import 'package:forty_link/network/http_client.dart';
-import 'package:forty_link/models/link_forty_config.dart';
-import 'package:forty_link/network/http_method.dart';
-import 'package:forty_link/network/http_response.dart';
+import 'package:linkforty_flutter/network/network_manager.dart';
+import 'package:linkforty_flutter/network/http_client.dart';
+import 'package:linkforty_flutter/models/link_forty_config.dart';
+import 'package:linkforty_flutter/network/http_method.dart';
+import 'package:linkforty_flutter/network/http_response.dart';
 
 import 'network_manager_test.mocks.dart';
 

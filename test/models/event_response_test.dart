@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/models/event_response.dart';
+import 'package:linkforty_flutter/models/event_response.dart';
 
 void main() {
   group('EventResponse', () {

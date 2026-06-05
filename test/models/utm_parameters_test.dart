@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/models/utm_parameters.dart';
+import 'package:linkforty_flutter/models/utm_parameters.dart';
 
 void main() {
   group('UTMParameters', () {

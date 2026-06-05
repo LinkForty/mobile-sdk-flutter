@@ -3,7 +3,7 @@
 
 **Native Flutter SDK for deep linking, mobile attribution, and conversion tracking.**
 
-[![Pub Version](https://img.shields.io/pub/v/forty_link.svg)](https://pub.dev/packages/forty_link)
+[![Pub Version](https://img.shields.io/pub/v/linkforty_flutter.svg)](https://pub.dev/packages/linkforty_flutter)
 [![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B.svg)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -31,13 +31,13 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  forty_link: ^0.0.1
+  linkforty_flutter: ^0.1.0
 ```
 
 Or run:
 
 ```bash
-flutter pub add forty_link
+flutter pub add linkforty_flutter
 ```
 
 ## Quick Start
@@ -47,8 +47,7 @@ flutter pub add forty_link
 Initialize the SDK in your `main.dart` or early in your app lifecycle.
 
 ```dart
-import 'package:forty_link/link_forty.dart';
-import 'package:forty_link/models/link_forty_config.dart';
+import 'package:linkforty_flutter/linkforty_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -145,8 +144,7 @@ await LinkForty.instance.trackRevenue(
 ### 5. Create Links Programmatically
 
 ```dart
-import 'package:forty_link/models/create_link_options.dart';
-import 'package:forty_link/models/utm_parameters.dart';
+import 'package:linkforty_flutter/linkforty_flutter.dart';
 
 // ...
 
@@ -275,7 +273,7 @@ The SDK enforces HTTPS for all API endpoints (except localhost, 127.0.0.1, and 1
 ## Support
 
 - **Documentation**: https://docs.linkforty.com
-- **Issues**: [GitHub Issues](https://github.com/DeTuksa/link_forty_flutter/issues)
+- **Issues**: [GitHub Issues](https://github.com/LinkForty/mobile-sdk-flutter/issues)
 
 ## License
 

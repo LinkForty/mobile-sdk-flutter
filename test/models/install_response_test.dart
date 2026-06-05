@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/models/install_response.dart';
-import 'package:forty_link/models/deep_link_data.dart';
+import 'package:linkforty_flutter/models/install_response.dart';
+import 'package:linkforty_flutter/models/deep_link_data.dart';
 
 void main() {
   group('InstallResponse', () {

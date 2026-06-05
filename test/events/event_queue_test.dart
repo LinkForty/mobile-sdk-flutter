@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/events/event_queue.dart';
-import 'package:forty_link/models/event_request.dart';
+import 'package:linkforty_flutter/events/event_queue.dart';
+import 'package:linkforty_flutter/models/event_request.dart';
 
 void main() {
   group('EventQueue', () {
