@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/models/dashboard_create_link_response.dart';
+import 'package:linkforty_flutter/models/dashboard_create_link_response.dart';
 
 void main() {
   group('DashboardCreateLinkResponse', () {

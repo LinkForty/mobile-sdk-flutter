@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:forty_link/link_forty.dart';
-import 'package:forty_link/models/link_forty_config.dart';
-import 'package:forty_link/models/deep_link_data.dart';
-import 'package:forty_link/models/create_link_options.dart';
+import 'package:linkforty_flutter/linkforty_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

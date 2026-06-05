@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/models/link_forty_config.dart';
+import 'package:linkforty_flutter/models/link_forty_config.dart';
 
 void main() {
   group('LinkFortyConfig', () {

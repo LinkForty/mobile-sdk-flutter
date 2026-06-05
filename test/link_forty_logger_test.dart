@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/link_forty_logger.dart';
+import 'package:linkforty_flutter/link_forty_logger.dart';
 
 void main() {
   group('LinkFortyLogger', () {

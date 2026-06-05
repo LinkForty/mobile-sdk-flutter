@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:forty_link/events/event_tracker.dart';
-import 'package:forty_link/events/event_queue.dart';
-import 'package:forty_link/network/network_manager.dart';
-import 'package:forty_link/storage/storage_manager.dart';
-import 'package:forty_link/models/event_request.dart';
-import 'package:forty_link/models/event_response.dart';
-import 'package:forty_link/network/http_method.dart';
-import 'package:forty_link/errors/link_forty_error.dart';
+import 'package:linkforty_flutter/events/event_tracker.dart';
+import 'package:linkforty_flutter/events/event_queue.dart';
+import 'package:linkforty_flutter/network/network_manager.dart';
+import 'package:linkforty_flutter/storage/storage_manager.dart';
+import 'package:linkforty_flutter/models/event_request.dart';
+import 'package:linkforty_flutter/models/event_response.dart';
+import 'package:linkforty_flutter/network/http_method.dart';
+import 'package:linkforty_flutter/errors/link_forty_error.dart';
 
 import 'event_tracker_test.mocks.dart';
 

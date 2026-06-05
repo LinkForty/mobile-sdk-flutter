@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/fingerprint/device_fingerprint.dart';
+import 'package:linkforty_flutter/fingerprint/device_fingerprint.dart';
 
 void main() {
   group('DeviceFingerprint', () {

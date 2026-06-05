@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/utilities/url_parser.dart';
+import 'package:linkforty_flutter/utilities/url_parser.dart';
 
 void main() {
   group('URLParser', () {

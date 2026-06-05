@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:forty_link/errors/link_forty_error.dart';
+import 'package:linkforty_flutter/errors/link_forty_error.dart';
 
 void main() {
   group('LinkFortyError', () {

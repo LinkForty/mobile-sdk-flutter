@@ -1,18 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:forty_link/link_forty.dart';
-import 'package:forty_link/models/link_forty_config.dart';
-import 'package:forty_link/models/install_response.dart';
-import 'package:forty_link/models/deep_link_data.dart';
-import 'package:forty_link/models/create_link_options.dart';
-import 'package:forty_link/models/dashboard_create_link_response.dart';
-import 'package:forty_link/network/network_manager.dart';
-import 'package:forty_link/storage/storage_manager.dart';
-import 'package:forty_link/fingerprint/fingerprint_collector.dart';
-import 'package:forty_link/fingerprint/device_fingerprint.dart';
-import 'package:forty_link/network/http_method.dart';
-import 'package:forty_link/errors/link_forty_error.dart';
+import 'package:linkforty_flutter/link_forty.dart';
+import 'package:linkforty_flutter/models/link_forty_config.dart';
+import 'package:linkforty_flutter/models/install_response.dart';
+import 'package:linkforty_flutter/models/deep_link_data.dart';
+import 'package:linkforty_flutter/models/create_link_options.dart';
+import 'package:linkforty_flutter/models/dashboard_create_link_response.dart';
+import 'package:linkforty_flutter/network/network_manager.dart';
+import 'package:linkforty_flutter/storage/storage_manager.dart';
+import 'package:linkforty_flutter/fingerprint/fingerprint_collector.dart';
+import 'package:linkforty_flutter/fingerprint/device_fingerprint.dart';
+import 'package:linkforty_flutter/network/http_method.dart';
+import 'package:linkforty_flutter/errors/link_forty_error.dart';
 
 import 'link_forty_test.mocks.dart';
 

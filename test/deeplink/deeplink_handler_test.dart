@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:forty_link/deeplink/deeplink_handler.dart';
-import 'package:forty_link/network/network_manager.dart';
-import 'package:forty_link/fingerprint/fingerprint_collector.dart';
-import 'package:forty_link/models/deep_link_data.dart';
-import 'package:forty_link/fingerprint/device_fingerprint.dart';
-import 'package:forty_link/network/http_method.dart';
+import 'package:linkforty_flutter/deeplink/deeplink_handler.dart';
+import 'package:linkforty_flutter/network/network_manager.dart';
+import 'package:linkforty_flutter/fingerprint/fingerprint_collector.dart';
+import 'package:linkforty_flutter/models/deep_link_data.dart';
+import 'package:linkforty_flutter/fingerprint/device_fingerprint.dart';
+import 'package:linkforty_flutter/network/http_method.dart';
 
 import 'deeplink_handler_test.mocks.dart';
 

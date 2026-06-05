@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:forty_link/storage/storage_manager.dart';
-import 'package:forty_link/storage/storage_keys.dart';
-import 'package:forty_link/models/deep_link_data.dart';
+import 'package:linkforty_flutter/storage/storage_manager.dart';
+import 'package:linkforty_flutter/storage/storage_keys.dart';
+import 'package:linkforty_flutter/models/deep_link_data.dart';
 
 import 'storage_manager_test.mocks.dart';
 

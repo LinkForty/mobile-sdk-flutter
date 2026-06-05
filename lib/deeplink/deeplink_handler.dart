@@ -36,9 +36,6 @@ class DeepLinkHandler {
   /// Fingerprint collector for resolution requests
   FingerprintCollectorProtocol? _fingerprintCollector;
 
-  /// Base URL for detecting LinkForty URLs
-  Uri? _baseURL;
-
   /// Flag to track if deferred deep link has been delivered
   bool _deferredDeepLinkDelivered = false;
 
@@ -61,7 +58,6 @@ class DeepLinkHandler {
   }) {
     _networkManager = networkManager;
     _fingerprintCollector = fingerprintCollector;
-    _baseURL = baseURL;
   }
 
   // MARK: - Deferred Deep Link (Install Attribution)
