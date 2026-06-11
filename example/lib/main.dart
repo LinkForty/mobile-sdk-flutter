@@ -17,6 +17,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
+      // Auto-reports a `screen_view` (stamped with last-click attribution) for
+      // every named route. Give your routes names to have them tracked.
+      navigatorObservers: [LinkFortyNavigatorObserver()],
       home: const LinkFortyDemo(),
     );
   }
@@ -128,6 +131,26 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
     }
   }
 
+  Future<void> _trackScreenView(String name) async {
+    try {
+      await LinkForty.instance.trackScreenView(name);
+
+      if (!mounted) return;
+      setState(() {
+        _eventCount++;
+        _queuedEvents = LinkForty.instance.queuedEventCount;
+      });
+
+      debugPrint('✅ Screen view tracked: $name');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString();
+      });
+      debugPrint('❌ Screen view tracking failed: $e');
+    }
+  }
+
   Future<void> _trackRevenue(double amount, String currency) async {
     try {
       await LinkForty.instance.trackRevenue(
@@ -233,6 +256,7 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
             // Events Section
             _EventsSection(
               onTrackEvent: _trackEvent,
+              onTrackScreenView: _trackScreenView,
               onTrackRevenue: _trackRevenue,
               onFlushEvents: _flushEvents,
             ),
@@ -384,12 +408,14 @@ class _AttributionSection extends StatelessWidget {
 
 class _EventsSection extends StatelessWidget {
   final Function(String) onTrackEvent;
+  final Function(String) onTrackScreenView;
   final Function(double, String) onTrackRevenue;
   final VoidCallback onFlushEvents;
 
   const _EventsSection({
     Key? key,
     required this.onTrackEvent,
+    required this.onTrackScreenView,
     required this.onTrackRevenue,
     required this.onFlushEvents,
   }) : super(key: key);
@@ -404,6 +430,13 @@ class _EventsSection extends StatelessWidget {
             onPressed: () => onTrackEvent('button_clicked'),
             icon: Icons.touch_app,
             label: 'Track Button Click',
+            color: Colors.blue,
+          ),
+          const SizedBox(height: 10),
+          _FullWidthButton(
+            onPressed: () => onTrackScreenView('Checkout'),
+            icon: Icons.web_asset,
+            label: 'Track Screen View (Checkout)',
             color: Colors.blue,
           ),
           const SizedBox(height: 10),
