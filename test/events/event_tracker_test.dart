@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:linkforty_flutter/attribution/attribution_context.dart';
 import 'package:linkforty_flutter/events/event_tracker.dart';
 import 'package:linkforty_flutter/events/event_queue.dart';
 import 'package:linkforty_flutter/network/network_manager.dart';
@@ -18,6 +19,7 @@ void main() {
   late MockStorageManagerProtocol mockStorageManager;
   late MockEventQueue mockQueue;
   late EventTracker eventTracker;
+  late AttributionContext attributionContext;
 
   setUp(() {
     mockNetworkManager = MockNetworkManagerProtocol();
@@ -34,9 +36,12 @@ void main() {
     when(mockQueue.enqueue(any)).thenReturn(true);
     when(mockQueue.peek()).thenReturn([]);
 
+    attributionContext = AttributionContext(storage: mockStorageManager);
+
     eventTracker = EventTracker(
       networkManager: mockNetworkManager,
       storageManager: mockStorageManager,
+      attributionContext: attributionContext,
       eventQueue: mockQueue,
     );
   });
@@ -87,6 +92,88 @@ void main() {
 
       // Should try to flush queue after success
       verify(mockQueue.isEmpty).called(1); // Called in flushQueue
+    });
+
+    test('trackEvent stamps the active last-click attribution', () async {
+      when(mockStorageManager.getInstallId()).thenReturn('inst_1');
+      when(mockStorageManager.saveAttribution(any))
+          .thenAnswer((_) async => true);
+      when(
+        mockNetworkManager.request<EventResponse>(
+          endpoint: anyNamed('endpoint'),
+          method: anyNamed('method'),
+          body: anyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).thenAnswer((_) async => const EventResponse(success: true));
+
+      // A deep link opens the app, then the user does something.
+      await attributionContext.recordDeepLinkOpen(
+        linkId: 'link-A',
+        clickId: 'click-1',
+      );
+      await eventTracker.trackEvent('purchase');
+
+      verify(
+        mockNetworkManager.request<EventResponse>(
+          endpoint: '/api/sdk/v1/event',
+          method: HttpMethod.post,
+          body: argThat(
+            isA<EventRequest>()
+                .having((e) => e.attributedLinkId, 'attributedLinkId', 'link-A')
+                .having(
+                  (e) => e.attributedClickId,
+                  'attributedClickId',
+                  'click-1',
+                )
+                .having((e) => e.sessionId, 'sessionId', isNotNull),
+            named: 'body',
+          ),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).called(1);
+    });
+
+    test('trackScreenView emits a screen_view with screen/previousScreen',
+        () async {
+      when(mockStorageManager.getInstallId()).thenReturn('inst_1');
+      when(
+        mockNetworkManager.request<EventResponse>(
+          endpoint: anyNamed('endpoint'),
+          method: anyNamed('method'),
+          body: anyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).thenAnswer((_) async => const EventResponse(success: true));
+
+      await eventTracker.trackScreenView('Home');
+      await eventTracker.trackScreenView('ProductDetail');
+
+      verify(
+        mockNetworkManager.request<EventResponse>(
+          endpoint: '/api/sdk/v1/event',
+          method: HttpMethod.post,
+          body: argThat(
+            isA<EventRequest>()
+                .having((e) => e.eventName, 'eventName', 'screen_view')
+                .having((e) => e.eventData['screen'], 'screen', 'ProductDetail')
+                .having(
+                  (e) => e.eventData['previousScreen'],
+                  'previousScreen',
+                  'Home',
+                ),
+            named: 'body',
+          ),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).called(1);
+    });
+
+    test('trackScreenView throws on an empty name', () async {
+      await expectLater(
+        () => eventTracker.trackScreenView('  '),
+        throwsA(isA<InvalidEventDataError>()),
+      );
     });
 
     test('trackEvent queues event if network fails', () async {
@@ -278,6 +365,7 @@ void main() {
       final tracker = EventTracker(
         networkManager: mockNetworkManager,
         storageManager: mockStorageManager,
+        attributionContext: attributionContext,
         eventQueue: realQueue,
       );
 

@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../sdk_info.dart';
+
 part 'event_request.g.dart';
 
 /// Request payload for tracking events
@@ -22,12 +24,37 @@ class EventRequest {
   /// ISO 8601 timestamp of when the event occurred
   final String timestamp;
 
+  /// SDK platform identifier (e.g., "flutter"), for backend SDK diagnostics
+  final String sdkName;
+
+  /// SDK release version (e.g., "0.2.0"), for backend SDK diagnostics
+  final String sdkVersion;
+
+  /// The deep link currently credited for this event (last-click). Null for
+  /// organic activity (no deep link has opened the app).
+  final String? attributedLinkId;
+
+  /// The originating click id, when known.
+  final String? attributedClickId;
+
+  /// ISO 8601 timestamp of when the attributing deep link opened the app.
+  final String? linkOpenedAt;
+
+  /// The app-open session this event belongs to (for screen-flow grouping).
+  final String? sessionId;
+
   /// Creates an event request
   EventRequest({
     required this.installId,
     required this.eventName,
     required this.eventData,
     DateTime? timestamp,
+    this.sdkName = SdkInfo.name,
+    this.sdkVersion = SdkInfo.version,
+    this.attributedLinkId,
+    this.attributedClickId,
+    this.linkOpenedAt,
+    this.sessionId,
   }) : timestamp = (timestamp ?? DateTime.now()).toIso8601String();
 
   /// JSON deserialization
@@ -78,6 +105,12 @@ class EventRequest {
           installId == other.installId &&
           eventName == other.eventName &&
           timestamp == other.timestamp &&
+          sdkName == other.sdkName &&
+          sdkVersion == other.sdkVersion &&
+          attributedLinkId == other.attributedLinkId &&
+          attributedClickId == other.attributedClickId &&
+          linkOpenedAt == other.linkOpenedAt &&
+          sessionId == other.sessionId &&
           _mapDeepEquals(eventData, other.eventData);
 
   @override
@@ -85,6 +118,12 @@ class EventRequest {
       installId.hashCode ^
       eventName.hashCode ^
       timestamp.hashCode ^
+      sdkName.hashCode ^
+      sdkVersion.hashCode ^
+      attributedLinkId.hashCode ^
+      attributedClickId.hashCode ^
+      linkOpenedAt.hashCode ^
+      sessionId.hashCode ^
       _mapDeepHashCode(eventData);
 
   /// Deep equality comparison for nested maps

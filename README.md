@@ -13,6 +13,8 @@
 - **Universal Links & App Links**: Full support for iOS Universal Links and Android App Links (HTTPS deep links)
 - **Custom URL Schemes**: Handle custom app URL schemes
 - **Event Tracking**: Track in-app events and conversions
+- **Last-Click Attribution**: In-app events are automatically credited to the deep link that most recently opened the app
+- **Screen-Flow Tracking**: Report screen views (manually or automatically via a `NavigatorObserver`) to see what users do after clicking a link
 - **Offline Support**: Queue events when offline with automatic retry
 - **Privacy-First**: No IDFA/GAID collection by default, complies with privacy requirements
 - **Programmatic Link Creation**: Create short links directly from your app
@@ -141,7 +143,32 @@ await LinkForty.instance.trackRevenue(
 );
 ```
 
-### 5. Create Links Programmatically
+Every event is automatically stamped with the deep link that most recently opened the app (last-click attribution), so the dashboard can show what users do *after* clicking a link. Events with no preceding deep-link open are reported as organic. No extra code is required.
+
+### 5. Track Screen Views
+
+Reporting screen views lets the dashboard build a per-link screen-flow funnel. Each `screen_view` carries the same last-click attribution stamp as other events.
+
+**Automatic** — add `LinkFortyNavigatorObserver` to your app's `navigatorObservers`. Named routes are reported as they appear:
+
+```dart
+import 'package:linkforty_flutter/linkforty_flutter.dart';
+
+MaterialApp(
+  navigatorObservers: [LinkFortyNavigatorObserver()],
+  // routes must have a name to be reported, e.g.:
+  // Navigator.pushNamed(context, '/product');  or  RouteSettings(name: 'ProductDetail')
+  // ...
+);
+```
+
+**Manual** — call it yourself (e.g. for screens not driven by named routes):
+
+```dart
+await LinkForty.instance.trackScreenView('ProductDetail');
+```
+
+### 6. Create Links Programmatically
 
 ```dart
 import 'package:linkforty_flutter/linkforty_flutter.dart';

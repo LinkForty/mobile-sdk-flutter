@@ -24,4 +24,7 @@ class StorageKeys {
 
   /// Event queue key (JSON array of EventRequest)
   static const String eventQueue = '$_prefix.eventQueue';
+
+  /// Active last-click attribution context key (ActiveAttribution JSON)
+  static const String attribution = '$_prefix.attribution';
 }

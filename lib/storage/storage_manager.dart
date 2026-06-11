@@ -179,11 +179,45 @@ class StorageManager implements StorageManagerProtocol {
     }
   }
 
+  // MARK: - Attribution
+
+  /// Persists the active last-click attribution context (as JSON).
+  ///
+  /// - [json]: The encoded `ActiveAttribution`
+  /// - Returns: True if successful
+  @override
+  Future<bool> saveAttribution(String json) async {
+    try {
+      return await _prefs.setString(StorageKeys.attribution, json);
+    } catch (e) {
+      LinkFortyLogger.log('Failed to save attribution: $e');
+      return false;
+    }
+  }
+
+  /// Retrieves the persisted active attribution context (as JSON), or null.
+  @override
+  String? getAttribution() {
+    return _prefs.getString(StorageKeys.attribution);
+  }
+
+  /// Removes the persisted active attribution context.
+  @override
+  Future<bool> removeAttribution() async {
+    try {
+      return await _prefs.remove(StorageKeys.attribution);
+    } catch (e) {
+      LinkFortyLogger.log('Failed to remove attribution: $e');
+      return false;
+    }
+  }
+
   // MARK: - Clear Data
 
   /// Clears all stored SDK data
   ///
-  /// This removes install ID, install data, first launch flag, and event queue
+  /// This removes install ID, install data, first launch flag, event queue,
+  /// and the active attribution context.
   ///
   /// - Returns: True if all removals were successful, false otherwise
   @override
@@ -194,6 +228,7 @@ class StorageManager implements StorageManagerProtocol {
         _prefs.remove(StorageKeys.installData),
         _prefs.remove(StorageKeys.firstLaunch),
         _prefs.remove(StorageKeys.eventQueue),
+        _prefs.remove(StorageKeys.attribution),
       ]);
 
       // Return true only if all removals were successful
@@ -215,5 +250,8 @@ abstract class StorageManagerProtocol {
   Future<bool> setHasLaunched();
   Future<bool> saveEventQueue(List<EventRequest> events);
   List<EventRequest> loadEventQueue();
+  Future<bool> saveAttribution(String json);
+  String? getAttribution();
+  Future<bool> removeAttribution();
   Future<bool> clearAll();
 }

@@ -9,6 +9,7 @@ import 'package:linkforty_flutter/network/http_client.dart';
 import 'package:linkforty_flutter/models/link_forty_config.dart';
 import 'package:linkforty_flutter/network/http_method.dart';
 import 'package:linkforty_flutter/network/http_response.dart';
+import 'package:linkforty_flutter/sdk_info.dart';
 
 import 'network_manager_test.mocks.dart';
 
@@ -93,6 +94,38 @@ void main() {
 
       final headers = captured.first as Map<String, String>;
       expect(headers['Authorization'], 'Bearer key');
+    });
+
+    test('adds SDK identity header', () async {
+      final responseBody = Uint8List.fromList(utf8.encode('{}'));
+      when(
+        mockHttpClient.execute(
+          url: anyNamed('url'),
+          method: anyNamed('method'),
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).thenAnswer(
+        (_) async => HttpResponse(statusCode: 200, body: responseBody),
+      );
+
+      await networkManager.request(
+        endpoint: '/test',
+        method: HttpMethod.get,
+        fromJson: (json) => json,
+      );
+
+      final captured = verify(
+        mockHttpClient.execute(
+          url: anyNamed('url'),
+          method: anyNamed('method'),
+          headers: captureAnyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).captured;
+
+      final headers = captured.first as Map<String, String>;
+      expect(headers['X-LinkForty-SDK'], '${SdkInfo.name}/${SdkInfo.version}');
     });
 
     test('retries on failure', () async {

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../network/network_manager.dart';
 
+import '../attribution/attribution_context.dart';
 import '../models/event_request.dart';
 import '../models/event_response.dart';
 import '../network/http_method.dart';
@@ -21,19 +22,26 @@ import 'event_queue.dart';
 class EventTracker implements EventTrackerProtocol {
   final NetworkManagerProtocol _networkManager;
   final StorageManagerProtocol _storageManager;
+  final AttributionContext _attributionContext;
   final EventQueue _eventQueue;
+
+  /// Last tracked screen name, for the `previousScreen` transition stamp.
+  String? _lastScreen;
 
   /// Creates an event tracker
   ///
   /// - [networkManager]: Network manager for API requests
   /// - [storageManager]: Storage manager for install ID and event queue persistence
+  /// - [attributionContext]: Last-click attribution context stamped onto each event
   /// - [eventQueue]: Event queue for offline support
   EventTracker({
     required NetworkManagerProtocol networkManager,
     required StorageManagerProtocol storageManager,
+    required AttributionContext attributionContext,
     EventQueue? eventQueue,
   })  : _networkManager = networkManager,
         _storageManager = storageManager,
+        _attributionContext = attributionContext,
         _eventQueue = eventQueue ?? EventQueue() {
     // Restore any events that were persisted before the last app session
     _restorePersistedQueue();
@@ -62,11 +70,18 @@ class EventTracker implements EventTrackerProtocol {
       throw const NotInitializedError();
     }
 
-    // Create event request
+    // Stamp the event with the active last-click attribution context so the
+    // backend can credit the deep link that drove it (organic events carry only
+    // the session id).
+    final stamp = _attributionContext.getStamp();
     final event = EventRequest(
       installId: installId,
       eventName: name,
       eventData: properties ?? {},
+      attributedLinkId: stamp.attributedLinkId,
+      attributedClickId: stamp.attributedClickId,
+      linkOpenedAt: stamp.linkOpenedAt,
+      sessionId: stamp.sessionId,
     );
 
     // Try to send immediately
@@ -109,6 +124,36 @@ class EventTracker implements EventTrackerProtocol {
     eventProperties['currency'] = currency;
 
     await trackEvent('revenue', eventProperties);
+  }
+
+  /// Tracks a screen view.
+  ///
+  /// Emits a `screen_view` event (through the normal pipeline, so it is stamped
+  /// with the active last-click attribution context) carrying the screen name
+  /// and — when available — the previously tracked screen, so the dashboard can
+  /// build a per-link screen-flow funnel.
+  ///
+  /// - [name]: Screen name (e.g., "ProductDetail")
+  /// - [properties]: Optional additional properties
+  @override
+  Future<void> trackScreenView(
+    String name, [
+    Map<String, dynamic>? properties,
+  ]) async {
+    if (name.trim().isEmpty) {
+      throw InvalidEventDataError('Screen name cannot be empty');
+    }
+
+    final previous = _lastScreen;
+    _lastScreen = name;
+
+    final eventProperties = Map<String, dynamic>.from(properties ?? {});
+    eventProperties['screen'] = name;
+    if (previous != null && previous != name) {
+      eventProperties['previousScreen'] = previous;
+    }
+
+    await trackEvent('screen_view', eventProperties);
   }
 
   // MARK: - Queue Management
@@ -188,6 +233,7 @@ abstract class EventTrackerProtocol {
     required String currency,
     Map<String, dynamic>? properties,
   });
+  Future<void> trackScreenView(String name, [Map<String, dynamic>? properties]);
   Future<void> flushQueue();
   int get queuedEventCount;
   void clearQueue();
