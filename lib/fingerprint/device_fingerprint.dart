@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../sdk_info.dart';
+
 part 'device_fingerprint.g.dart';
 
 /// A data model representing a unique snapshot of device characteristics.
@@ -43,6 +45,12 @@ class DeviceFingerprint {
   /// Attribution window in hours
   final int attributionWindowHours;
 
+  /// SDK platform identifier (e.g., "flutter"), for backend SDK diagnostics
+  final String sdkName;
+
+  /// SDK release version (e.g., "0.2.0"), for backend SDK diagnostics
+  final String sdkVersion;
+
   /// Creates a device fingerprint
   const DeviceFingerprint({
     required this.userAgent,
@@ -55,6 +63,8 @@ class DeviceFingerprint {
     required this.appVersion,
     this.deviceId,
     required this.attributionWindowHours,
+    this.sdkName = SdkInfo.name,
+    this.sdkVersion = SdkInfo.version,
   });
 
   /// JSON deserialization
@@ -90,7 +100,9 @@ class DeviceFingerprint {
           platformVersion == other.platformVersion &&
           appVersion == other.appVersion &&
           deviceId == other.deviceId &&
-          attributionWindowHours == other.attributionWindowHours;
+          attributionWindowHours == other.attributionWindowHours &&
+          sdkName == other.sdkName &&
+          sdkVersion == other.sdkVersion;
 
   @override
   int get hashCode =>
@@ -103,5 +115,7 @@ class DeviceFingerprint {
       platformVersion.hashCode ^
       appVersion.hashCode ^
       deviceId.hashCode ^
-      attributionWindowHours.hashCode;
+      attributionWindowHours.hashCode ^
+      sdkName.hashCode ^
+      sdkVersion.hashCode;
 }

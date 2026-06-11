@@ -18,6 +18,9 @@ export 'link_forty.dart';
 export 'deeplink/deeplink_handler.dart'
     show DeferredDeepLinkCallback, DeepLinkCallback;
 
+// Automatic screen-view tracking.
+export 'navigation/link_forty_navigator_observer.dart';
+
 // Public models.
 export 'models/link_forty_config.dart';
 export 'models/deep_link_data.dart';

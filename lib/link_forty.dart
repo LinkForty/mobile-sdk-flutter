@@ -16,6 +16,7 @@ import 'network/http_method.dart';
 import 'storage/storage_manager.dart';
 import 'fingerprint/fingerprint_collector.dart';
 import 'attribution/attribution_manager.dart';
+import 'attribution/attribution_context.dart';
 import 'events/event_tracker.dart';
 import 'deeplink/deeplink_handler.dart';
 import 'errors/link_forty_error.dart';
@@ -57,6 +58,7 @@ class LinkForty {
   LinkFortyConfig? _config;
   NetworkManagerProtocol? _networkManager;
   AttributionManager? _attributionManager;
+  AttributionContext? _attributionContext;
   EventTracker? _eventTracker;
   DeepLinkHandler? _deepLinkHandler;
 
@@ -113,6 +115,12 @@ class LinkForty {
 
     sdk._networkManager = effectiveNetworkManager;
 
+    final attributionContext = AttributionContext(
+      storage: effectiveStorageManager,
+      debug: config.debug,
+    );
+    sdk._attributionContext = attributionContext;
+
     sdk._attributionManager = AttributionManager(
       networkManager: effectiveNetworkManager,
       storageManager: effectiveStorageManager,
@@ -122,6 +130,7 @@ class LinkForty {
     sdk._eventTracker = EventTracker(
       networkManager: effectiveNetworkManager,
       storageManager: effectiveStorageManager,
+      attributionContext: attributionContext,
     );
 
     final deepLinkHandler = DeepLinkHandler();
@@ -129,6 +138,7 @@ class LinkForty {
       networkManager: effectiveNetworkManager,
       fingerprintCollector: effectiveFingerprintCollector,
       baseURL: config.baseURL,
+      attributionContext: attributionContext,
     );
     sdk._deepLinkHandler = deepLinkHandler;
 
@@ -230,6 +240,24 @@ class LinkForty {
       currency: currency,
       properties: properties,
     );
+  }
+
+  /// Tracks a screen view for per-link screen-flow funnels.
+  ///
+  /// Emits a `screen_view` event stamped with the active last-click attribution
+  /// context, so the dashboard can show which screens users reach after opening a
+  /// deep link. For automatic tracking, add [LinkFortyNavigatorObserver] to your
+  /// app's `navigatorObservers`.
+  ///
+  /// Throws [NotInitializedError] if the SDK is not initialized.
+  Future<void> trackScreenView(
+    String name, [
+    Map<String, dynamic>? properties,
+  ]) async {
+    if (!_isInitialized) {
+      throw const NotInitializedError();
+    }
+    await _eventTracker?.trackScreenView(name, properties);
   }
 
   /// Manually triggers a flush of all queued events to the server.
@@ -348,6 +376,7 @@ class LinkForty {
   /// Use this for user privacy compliance (e.g., GDPR/CCPA).
   Future<void> clearData() async {
     await _attributionManager?.clearData();
+    await _attributionContext?.clear();
     _eventTracker?.clearQueue();
     _deepLinkHandler?.clearCallbacks();
     LinkFortyLogger.log('All SDK data cleared');
@@ -361,6 +390,7 @@ class LinkForty {
     _config = null;
     _networkManager = null;
     _attributionManager = null;
+    _attributionContext = null;
     _eventTracker = null;
     _deepLinkHandler = null;
     _isInitialized = false;

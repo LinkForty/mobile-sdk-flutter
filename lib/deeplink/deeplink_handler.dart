@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import '../attribution/attribution_context.dart';
 import '../link_forty_logger.dart';
 import '../models/deep_link_data.dart';
 import '../network/network_manager.dart';
@@ -36,6 +37,9 @@ class DeepLinkHandler {
   /// Fingerprint collector for resolution requests
   FingerprintCollectorProtocol? _fingerprintCollector;
 
+  /// Last-click attribution context updated on each deep-link open
+  AttributionContext? _attributionContext;
+
   /// Flag to track if deferred deep link has been delivered
   bool _deferredDeepLinkDelivered = false;
 
@@ -55,9 +59,11 @@ class DeepLinkHandler {
     required NetworkManagerProtocol networkManager,
     required FingerprintCollectorProtocol fingerprintCollector,
     required Uri baseURL,
+    AttributionContext? attributionContext,
   }) {
     _networkManager = networkManager;
     _fingerprintCollector = fingerprintCollector;
+    _attributionContext = attributionContext;
   }
 
   // MARK: - Deferred Deep Link (Install Attribution)
@@ -81,6 +87,9 @@ class DeepLinkHandler {
   Future<void> deliverDeferredDeepLink(DeepLinkData? deepLinkData) async {
     _cachedDeferredDeepLink = deepLinkData;
     _deferredDeepLinkDelivered = true;
+
+    // Pin last-click attribution to this deferred (install) open.
+    await _attributionContext?.recordDeepLinkOpen(linkId: deepLinkData?.linkId);
 
     LinkFortyLogger.log(
       'Delivering deferred deep link: ${deepLinkData?.shortCode ?? "organic"}',
@@ -124,6 +133,11 @@ class DeepLinkHandler {
     final callbacks = List<DeepLinkCallback>.from(_deepLinkCallbacks);
 
     if (resolvedData != null) {
+      // Pin last-click attribution to this direct (re-engagement) open;
+      // supersedes any prior context. Organic/unresolved opens are a no-op.
+      await _attributionContext?.recordDeepLinkOpen(
+        linkId: resolvedData.linkId,
+      );
       LinkFortyLogger.log('Parsed deep link: $resolvedData');
     } else {
       LinkFortyLogger.log('Failed to parse deep link URL');

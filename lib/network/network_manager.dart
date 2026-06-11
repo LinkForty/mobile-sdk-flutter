@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import '../models/link_forty_config.dart';
 import '../errors/link_forty_error.dart';
 import '../link_forty_logger.dart';
+import '../sdk_info.dart';
 import 'http_client.dart';
 import 'http_method.dart';
 import 'http_response.dart';
@@ -114,6 +115,10 @@ class NetworkManager implements NetworkManagerProtocol {
 
     // Build headers
     final requestHeaders = <String, String>{'Content-Type': 'application/json'};
+
+    // Identify the SDK + version on every request (mirrors the sdkName/
+    // sdkVersion fields in the install/event payloads) for backend diagnostics.
+    requestHeaders['X-LinkForty-SDK'] = '${SdkInfo.name}/${SdkInfo.version}';
 
     // Add API key if present
     if (_config.apiKey != null) {

@@ -18,6 +18,8 @@ DeviceFingerprint _$DeviceFingerprintFromJson(Map<String, dynamic> json) =>
       appVersion: json['appVersion'] as String,
       deviceId: json['deviceId'] as String?,
       attributionWindowHours: (json['attributionWindowHours'] as num).toInt(),
+      sdkName: json['sdkName'] as String? ?? SdkInfo.name,
+      sdkVersion: json['sdkVersion'] as String? ?? SdkInfo.version,
     );
 
 Map<String, dynamic> _$DeviceFingerprintToJson(DeviceFingerprint instance) =>
@@ -32,4 +34,6 @@ Map<String, dynamic> _$DeviceFingerprintToJson(DeviceFingerprint instance) =>
       'appVersion': instance.appVersion,
       'deviceId': instance.deviceId,
       'attributionWindowHours': instance.attributionWindowHours,
+      'sdkName': instance.sdkName,
+      'sdkVersion': instance.sdkVersion,
     };

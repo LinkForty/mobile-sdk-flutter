@@ -14,6 +14,12 @@ EventRequest _$EventRequestFromJson(Map<String, dynamic> json) => EventRequest(
       timestamp: json['timestamp'] == null
           ? null
           : DateTime.parse(json['timestamp'] as String),
+      sdkName: json['sdkName'] as String? ?? SdkInfo.name,
+      sdkVersion: json['sdkVersion'] as String? ?? SdkInfo.version,
+      attributedLinkId: json['attributedLinkId'] as String?,
+      attributedClickId: json['attributedClickId'] as String?,
+      linkOpenedAt: json['linkOpenedAt'] as String?,
+      sessionId: json['sessionId'] as String?,
     );
 
 Map<String, dynamic> _$EventRequestToJson(EventRequest instance) =>
@@ -22,4 +28,10 @@ Map<String, dynamic> _$EventRequestToJson(EventRequest instance) =>
       'eventName': instance.eventName,
       'eventData': EventRequest._eventDataToJson(instance.eventData),
       'timestamp': instance.timestamp,
+      'sdkName': instance.sdkName,
+      'sdkVersion': instance.sdkVersion,
+      'attributedLinkId': instance.attributedLinkId,
+      'attributedClickId': instance.attributedClickId,
+      'linkOpenedAt': instance.linkOpenedAt,
+      'sessionId': instance.sessionId,
     };

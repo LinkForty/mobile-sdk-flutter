@@ -181,6 +181,24 @@ class MockStorageManagerProtocol extends _i1.Mock
       ) as List<_i9.EventRequest>);
 
   @override
+  _i2.Future<bool> saveAttribution(String? json) => (super.noSuchMethod(
+        Invocation.method(
+          #saveAttribution,
+          [json],
+        ),
+        returnValue: _i2.Future<bool>.value(false),
+      ) as _i2.Future<bool>);
+
+  @override
+  _i2.Future<bool> removeAttribution() => (super.noSuchMethod(
+        Invocation.method(
+          #removeAttribution,
+          [],
+        ),
+        returnValue: _i2.Future<bool>.value(false),
+      ) as _i2.Future<bool>);
+
+  @override
   _i2.Future<bool> clearAll() => (super.noSuchMethod(
         Invocation.method(
           #clearAll,
