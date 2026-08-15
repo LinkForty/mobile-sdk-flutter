@@ -1,3 +1,7 @@
+## Unreleased
+
+* **Fixed:** `InstallResponse.fromJson` no longer throws when the backend returns `deepLinkData: {}` for an organic (unattributed) install, which surfaced as an error out of `initialize()`. An empty — or otherwise unusable — `deepLinkData` object is now treated as "no deep link" (`null`), the same as an explicit `null`.
+
 ## 0.2.0
 
 * The SDK now identifies itself on every request: a `sdkName` (`"flutter"`) and `sdkVersion` field is included on the install and event payloads, and an `X-LinkForty-SDK: flutter/<version>` header is sent on all requests. This lets the backend report which SDKs and versions are in use and flag outdated integrations. No API or integration changes are required.

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:json_annotation/json_annotation.dart';
+import '../link_forty_logger.dart';
 import 'deep_link_data.dart';
 
 part 'install_response.g.dart';
@@ -23,6 +24,7 @@ class InstallResponse {
   final List<String> matchedFactors;
 
   /// Deep link data if attributed, null if organic
+  @JsonKey(fromJson: _deepLinkDataFromJson)
   final DeepLinkData? deepLinkData;
 
   /// Creates an install response
@@ -82,5 +84,24 @@ class InstallResponse {
   /// Helper for list hash code
   static int _listHashCode(List<String> list) {
     return list.fold(0, (hash, item) => hash ^ item.hashCode);
+  }
+
+  /// Parses the `deepLinkData` field of an install response.
+  ///
+  /// Organic (unattributed) installs come back as `deepLinkData: {}` rather
+  /// than `null`, and an object without a `shortCode` carries no link to route
+  /// to. Any payload that cannot be parsed is treated as "no deep link" so a
+  /// missing or unexpected field can never fail the whole install response —
+  /// that would abort SDK initialization for every organic install.
+  static DeepLinkData? _deepLinkDataFromJson(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    try {
+      return DeepLinkData.fromJson(json);
+    } catch (e) {
+      LinkFortyLogger.log(
+        'Ignoring undecodable deepLinkData in install response: $e',
+      );
+      return null;
+    }
   }
 }
