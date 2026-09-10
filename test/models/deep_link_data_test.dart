@@ -79,7 +79,8 @@ void main() {
           customParameters: {'a': '1'},
         );
 
-        expect(identical(resolved.mergingUrlParameters(null), resolved), isTrue);
+        expect(
+            identical(resolved.mergingUrlParameters(null), resolved), isTrue);
         expect(identical(resolved.mergingUrlParameters({}), resolved), isTrue);
       });
 
@@ -99,6 +100,5 @@ void main() {
             'https://play.google.com/store/apps/details?id=com.app');
       });
     });
-
   });
 }
