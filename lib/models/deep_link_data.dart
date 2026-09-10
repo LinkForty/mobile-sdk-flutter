@@ -65,6 +65,38 @@ class DeepLinkData {
     this.linkId,
   });
 
+  /// Returns a copy with the parameters carried on the opened URL merged in.
+  ///
+  /// Resolving a short code returns the link's *stored* configuration; the
+  /// server has no way to know what was appended to the URL that was actually
+  /// tapped. The SDK does, having just parsed it. Without this a link shared as
+  /// `?slug=titanic` reaches the app with that value missing on a direct open,
+  /// while the same link after a deferred install carries it — the server merges
+  /// the click's parameters there.
+  ///
+  /// URL values win on a key collision, matching that server-side precedence:
+  /// what a sharer put on the URL is more specific than the link's stored setup.
+  ///
+  /// Only [customParameters] is merged. [linkId], [deepLinkPath], [appScheme],
+  /// the store URLs and [utmParameters] are server truth that a local parse
+  /// cannot know and must not overwrite.
+  DeepLinkData mergingUrlParameters(Map<String, String>? fromUrl) {
+    if (fromUrl == null || fromUrl.isEmpty) return this;
+
+    return DeepLinkData(
+      shortCode: shortCode,
+      iosURL: iosURL,
+      androidURL: androidURL,
+      webURL: webURL,
+      utmParameters: utmParameters,
+      customParameters: {...?customParameters, ...fromUrl},
+      deepLinkPath: deepLinkPath,
+      appScheme: appScheme,
+      clickedAt: clickedAt,
+      linkId: linkId,
+    );
+  }
+
   /// JSON deserialization
   factory DeepLinkData.fromJson(Map<String, dynamic> json) =>
       _$DeepLinkDataFromJson(json);
