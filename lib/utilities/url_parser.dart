@@ -57,21 +57,28 @@ class URLParser {
   ///
   /// - [url]: The URL to parse
   /// - Returns: Map of custom parameters, empty if none found
-  static Map<String, String> extractCustomParameters(Uri url) {
-    final utmKeys = {
-      'utm_source',
-      'utm_medium',
-      'utm_campaign',
-      'utm_term',
-      'utm_content',
-    };
+  /// Names LinkForty consumes, which are never a custom parameter:
+  ///   utm_*    surfaced separately as utmParameters
+  ///   fp_*     fingerprint signals the SDK appends when resolving a link, and
+  ///            which the redirect reads server-side for attribution
+  ///   lf_click the click id the redirect appends to a destination URL
+  ///
+  /// Mirrors the server's own filter so a direct open and a deferred install
+  /// agree on what reaches the app. Matching is by prefix rather than an exact
+  /// set, so any `utm_` or `fp_` name is covered whatever the suffix.
+  static bool isReservedParameter(String name) {
+    final lower = name.toLowerCase();
+    return lower.startsWith('utm_') ||
+        lower.startsWith('fp_') ||
+        lower == 'lf_click';
+  }
 
+  static Map<String, String> extractCustomParameters(Uri url) {
     final customParams = <String, String>{};
     final params = url.queryParameters;
 
     for (final entry in params.entries) {
-      // Skip UTM parameters
-      if (!utmKeys.contains(entry.key)) {
+      if (!isReservedParameter(entry.key)) {
         customParams[entry.key] = entry.value;
       }
     }

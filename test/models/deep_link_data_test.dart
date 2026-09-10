@@ -54,5 +54,51 @@ void main() {
       expect(data1, equals(data2));
       expect(data1, isNot(equals(data3)));
     });
+
+    group('mergingUrlParameters', () {
+      test('adds URL parameters when the link configures none', () {
+        final merged = const DeepLinkData(shortCode: 'abc123')
+            .mergingUrlParameters({'slug': 'titanic'});
+
+        expect(merged.customParameters, {'slug': 'titanic'});
+      });
+
+      test('lets a URL parameter override a configured one', () {
+        // Same precedence the server applies on the deferred path.
+        final merged = const DeepLinkData(
+          shortCode: 'abc123',
+          customParameters: {'slug': 'default', 'keep': 'me'},
+        ).mergingUrlParameters({'slug': 'titanic'});
+
+        expect(merged.customParameters, {'slug': 'titanic', 'keep': 'me'});
+      });
+
+      test('is a no-op when the URL carried nothing', () {
+        const resolved = DeepLinkData(
+          shortCode: 'abc123',
+          customParameters: {'a': '1'},
+        );
+
+        expect(identical(resolved.mergingUrlParameters(null), resolved), isTrue);
+        expect(identical(resolved.mergingUrlParameters({}), resolved), isTrue);
+      });
+
+      test('never overwrites fields only the server knows', () {
+        final merged = const DeepLinkData(
+          shortCode: 'abc123',
+          androidURL: 'https://play.google.com/store/apps/details?id=com.app',
+          deepLinkPath: '/product/1',
+          appScheme: 'myapp',
+          linkId: 'link-1',
+        ).mergingUrlParameters({'slug': 'titanic'});
+
+        expect(merged.linkId, 'link-1');
+        expect(merged.deepLinkPath, '/product/1');
+        expect(merged.appScheme, 'myapp');
+        expect(merged.androidURL,
+            'https://play.google.com/store/apps/details?id=com.app');
+      });
+    });
+
   });
 }
