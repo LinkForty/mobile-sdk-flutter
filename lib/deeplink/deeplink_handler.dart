@@ -218,7 +218,9 @@ class DeepLinkHandler {
       );
 
       LinkFortyLogger.log('Server-side resolution succeeded for $uri');
-      return resolved;
+      // The resolve returns the link's stored configuration; the parameters on
+      // the URL that was tapped are known only here.
+      return resolved.mergingUrlParameters(fallback?.customParameters);
     } catch (e) {
       LinkFortyLogger.log(
         'Server-side resolution failed, using local parse: $e',
