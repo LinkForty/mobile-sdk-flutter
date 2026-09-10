@@ -1,3 +1,7 @@
+## Unreleased
+
+* **Fixed:** `InstallResponse.fromJson` no longer throws when the backend returns `deepLinkData: {}` for an organic (unattributed) install, which surfaced as an error out of `initialize()`. An empty — or otherwise unusable — `deepLinkData` object is now treated as "no deep link" (`null`), the same as an explicit `null`.
+
 ## 0.2.1
 
 * **URL parameters are now delivered on a direct open** (app already installed), not just after a deferred install. A link shared as `?slug=titanic` previously returned only the link's stored configuration on a direct open, because `_resolveUrl` discarded the local parse of the tapped URL. `customParameters` now carries both, with URL values winning on a collision — the same precedence the server applies on the deferred path. `linkId`, `deepLinkPath`, `appScheme`, the store URLs and `utmParameters` remain server-provided.

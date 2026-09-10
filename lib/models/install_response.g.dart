@@ -14,9 +14,7 @@ InstallResponse _$InstallResponseFromJson(Map<String, dynamic> json) =>
       matchedFactors: (json['matchedFactors'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      deepLinkData: json['deepLinkData'] == null
-          ? null
-          : DeepLinkData.fromJson(json['deepLinkData'] as Map<String, dynamic>),
+      deepLinkData: InstallResponse._deepLinkDataFromJson(json['deepLinkData']),
     );
 
 Map<String, dynamic> _$InstallResponseToJson(InstallResponse instance) =>
