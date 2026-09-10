@@ -112,6 +112,5 @@ void main() {
         expect(URLParser.extractCustomParameters(url), {'slug': 'titanic'});
       });
     });
-
   });
 }
