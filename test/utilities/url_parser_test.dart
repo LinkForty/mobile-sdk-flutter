@@ -79,5 +79,38 @@ void main() {
         expect(data, isNull);
       });
     });
+
+    group('isReservedParameter', () {
+      test('covers the names LinkForty consumes', () {
+        // utm_* is surfaced separately as utmParameters; fp_* are fingerprint
+        // signals the redirect reads server-side; lf_click is the id appended
+        // to a destination URL. The server's extractor excludes all three.
+        expect(URLParser.isReservedParameter('utm_source'), isTrue);
+        expect(URLParser.isReservedParameter('fp_tz'), isTrue);
+        expect(URLParser.isReservedParameter('lf_click'), isTrue);
+      });
+
+      test('matches case-insensitively', () {
+        expect(URLParser.isReservedParameter('UTM_Source'), isTrue);
+        expect(URLParser.isReservedParameter('FP_TZ'), isTrue);
+        expect(URLParser.isReservedParameter('LF_Click'), isTrue);
+      });
+
+      test('does not sweep up near-misses', () {
+        expect(URLParser.isReservedParameter('slug'), isFalse);
+        expect(URLParser.isReservedParameter('utmost'), isFalse);
+        expect(URLParser.isReservedParameter('fps'), isFalse);
+        expect(URLParser.isReservedParameter('lf_clicks'), isFalse);
+      });
+    });
+
+    group('extractCustomParameters excludes reserved names', () {
+      test('keeps only the app\'s own parameters', () {
+        final url = Uri.parse(
+          'https://example.com/abc12345?slug=titanic&utm_source=ig&fp_tz=UTC&lf_click=abc',
+        );
+        expect(URLParser.extractCustomParameters(url), {'slug': 'titanic'});
+      });
+    });
   });
 }
