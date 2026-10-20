@@ -22,8 +22,8 @@
 
 ## Requirements
 
-- Flutter 3.10+
-- Dart 3.0+
+- Flutter 3.38.1+
+- Dart 3.10+
 - iOS 12.0+
 - Android API 21+
 
@@ -33,7 +33,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.3.0
+  linkforty_flutter: ^0.3.1
 ```
 
 Or run:

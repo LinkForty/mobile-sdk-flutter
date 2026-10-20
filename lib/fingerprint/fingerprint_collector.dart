@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'device_fingerprint.dart';
 
 class _ScreenDimensions {
@@ -67,7 +67,7 @@ class FingerprintCollector implements FingerprintCollectorProtocol {
 
     return DeviceFingerprint(
       userAgent: userAgent,
-      timezone: _getTimezone(),
+      timezone: await localTimezone(),
       language: _getLanguage(),
       screenWidth: screenWidth,
       screenHeight: screenHeight,
@@ -119,14 +119,16 @@ class FingerprintCollector implements FingerprintCollectorProtocol {
     }
   }
 
-  /// Gets timezone identifier (e.g., "America/New_York")
-  String _getTimezone() {
+  /// Returns the device's IANA timezone identifier (e.g., "America/New_York").
+  ///
+  /// The server compares it with the zone it derives from the IP address of a
+  /// browser click, which is always an IANA identifier. If the platform can't
+  /// report one, the abbreviation (e.g., "EST") is returned instead.
+  @visibleForTesting
+  static Future<String> localTimezone() async {
     try {
-      // Try to get the location timezone
-      final location = tz.local;
-      return location.name;
+      return (await FlutterTimezone.getLocalTimezone()).identifier;
     } catch (_) {
-      // Fallback to simple timezone name
       return DateTime.now().timeZoneName;
     }
   }
