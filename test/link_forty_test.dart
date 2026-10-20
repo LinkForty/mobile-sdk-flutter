@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -101,6 +103,7 @@ void main() {
         networkManager: mockNetworkManager,
         storageManager: mockStorageManager,
         fingerprintCollector: mockFingerprintCollector,
+        incomingLinks: const Stream.empty(),
       );
 
       expect(LinkForty.instance, isNotNull);
@@ -171,6 +174,7 @@ void main() {
         networkManager: mockNetworkManager,
         storageManager: mockStorageManager,
         fingerprintCollector: mockFingerprintCollector,
+        incomingLinks: const Stream.empty(),
       );
 
       // Create Link
@@ -197,6 +201,200 @@ void main() {
           fromJson: anyNamed('fromJson'),
         ),
       ).called(1);
+    });
+  });
+
+  group('LinkForty incoming links', () {
+    final fingerprint = DeviceFingerprint(
+      userAgent: 'ua',
+      timezone: 'tz',
+      language: 'en',
+      screenWidth: 100,
+      screenHeight: 100,
+      platform: 'test',
+      platformVersion: '1.0',
+      appVersion: '1.0',
+      attributionWindowHours: 168,
+    );
+    final launchLink = Uri.parse('https://example.com/abc');
+    late StreamController<Uri> links;
+
+    setUp(() {
+      links = StreamController<Uri>();
+      when(
+        mockFingerprintCollector.collectFingerprint(
+          attributionWindowHours: anyNamed('attributionWindowHours'),
+          deviceId: anyNamed('deviceId'),
+        ),
+      ).thenAnswer((_) async => fingerprint);
+      when(
+        mockNetworkManager.request<DeepLinkData>(
+          endpoint:
+              argThat(startsWith('/api/sdk/v1/resolve/'), named: 'endpoint'),
+          method: anyNamed('method'),
+          body: anyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).thenAnswer(
+        (_) async => const DeepLinkData(shortCode: 'abc', linkId: 'direct'),
+      );
+      when(mockStorageManager.saveAttribution(any))
+          .thenAnswer((_) async => true);
+    });
+
+    // close() never completes on a controller nothing listened to.
+    tearDown(() {
+      links.close();
+    });
+
+    void stubInstall(InstallResponse response, {Duration? delay}) {
+      when(
+        mockNetworkManager.request<InstallResponse>(
+          endpoint: '/api/sdk/v1/install',
+          method: anyNamed('method'),
+          body: anyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).thenAnswer((_) async {
+        if (delay != null) await Future<void>.delayed(delay);
+        return response;
+      });
+    }
+
+    Future<InstallResponse> initialize({LinkFortyConfig? withConfig}) {
+      return LinkForty.initialize(
+        config: withConfig ?? config,
+        networkManager: mockNetworkManager,
+        storageManager: mockStorageManager,
+        fingerprintCollector: mockFingerprintCollector,
+        incomingLinks: links.stream,
+      );
+    }
+
+    const organic = InstallResponse(
+      installId: 'inst_1',
+      attributed: false,
+      confidenceScore: 0,
+      matchedFactors: [],
+    );
+
+    test(
+      'delivers the launch link to an onDeepLink callback registered after '
+      'initialize',
+      () async {
+        stubInstall(organic);
+        links.add(launchLink);
+        await initialize();
+
+        Uri? deliveredUri;
+        DeepLinkData? deliveredData;
+        LinkForty.instance.onDeepLink((uri, data) {
+          deliveredUri = uri;
+          deliveredData = data;
+        });
+        await pumpEventQueue();
+
+        expect(deliveredUri, launchLink);
+        expect(deliveredData?.linkId, 'direct');
+      },
+    );
+
+    test('delivers a link opened while running to registered callbacks',
+        () async {
+      stubInstall(organic);
+      await initialize();
+
+      final delivered = <Uri>[];
+      LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
+      links.add(launchLink);
+      await pumpEventQueue();
+
+      expect(delivered, [launchLink]);
+    });
+
+    test('a manual handleDeepLink of the same link is delivered once',
+        () async {
+      stubInstall(organic);
+      links.add(launchLink);
+      await initialize();
+
+      final delivered = <Uri>[];
+      LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
+      await LinkForty.instance.handleDeepLink(launchLink);
+      await pumpEventQueue();
+
+      expect(delivered, [launchLink]);
+    });
+
+    test('calls onDeferredDeepLink with null for an organic install', () async {
+      stubInstall(organic);
+      await initialize();
+
+      var called = false;
+      DeepLinkData? delivered = const DeepLinkData(shortCode: 'unset');
+      LinkForty.instance.onDeferredDeepLink((data) {
+        called = true;
+        delivered = data;
+      });
+      await pumpEventQueue();
+
+      expect(called, isTrue);
+      expect(delivered, isNull);
+    });
+
+    test('reports the install with the configured attribution window',
+        () async {
+      stubInstall(organic);
+      await initialize(
+        withConfig: LinkFortyConfig(
+          baseURL: Uri.parse('https://example.com'),
+          attributionWindowHours: 24,
+        ),
+      );
+
+      verify(
+        mockFingerprintCollector.collectFingerprint(
+          attributionWindowHours: 24,
+          deviceId: anyNamed('deviceId'),
+        ),
+      ).called(1);
+    });
+
+    test('a direct open during the install launch outranks the install link',
+        () async {
+      stubInstall(
+        const InstallResponse(
+          installId: 'inst_1',
+          attributed: true,
+          confidenceScore: 90,
+          matchedFactors: [],
+          deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
+        ),
+        delay: const Duration(milliseconds: 20),
+      );
+      links.add(launchLink);
+      await initialize();
+
+      final saved = verify(mockStorageManager.saveAttribution(captureAny))
+          .captured
+          .cast<String>();
+      expect(saved, hasLength(1));
+      expect(saved.single, contains('"direct"'));
+    });
+
+    test('a cached install does not replace last-click attribution', () async {
+      when(mockStorageManager.getInstallId()).thenReturn('inst_1');
+      when(mockStorageManager.getInstallData()).thenReturn(
+        const DeepLinkData(shortCode: 'xyz', linkId: 'install'),
+      );
+      await initialize();
+
+      DeepLinkData? delivered;
+      LinkForty.instance.onDeferredDeepLink((data) => delivered = data);
+      await pumpEventQueue();
+
+      expect(delivered?.linkId, 'install');
+      verifyNever(mockStorageManager.saveAttribution(any));
     });
   });
 }

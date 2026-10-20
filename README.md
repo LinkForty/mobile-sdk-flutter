@@ -33,7 +33,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.2.3
+  linkforty_flutter: ^0.3.0
 ```
 
 Or run:
@@ -76,7 +76,7 @@ void main() async {
 
 ### 2. Handle Deferred Deep Links (Install Attribution)
 
-Register a callback to handle deferred deep links. This is triggered when the app is installed from a link.
+Register a callback after `initialize()` returns. It receives the link the app was installed from, or `null` for an organic install. It is called on every launch with the attribution recorded at install, so if it drives navigation, record that you have handled it (in your own storage) and act on it once.
 
 ```dart
 // checking attribution status
@@ -100,7 +100,11 @@ LinkForty.instance.onDeferredDeepLink((deepLinkData) {
 
 ### 3. Handle Direct Deep Links (Universal Links / App Links)
 
-The SDK uses `app_links` internally to handle incoming links. You just need to register a callback.
+The SDK listens for incoming links itself (via `app_links`), including the link that launched the app from a terminated state. Register a callback after `initialize()` returns: a link that arrived before any callback was registered is delivered to the first one.
+
+You don't need your own `app_links` listener. If you have one from an earlier version, remove it; if you keep it, the SDK ignores the same URL passed to `handleDeepLink()` again within 10 seconds. Use `handleDeepLink()` for links that reach the app some other way, such as a push notification payload.
+
+If you also use Flutter's built-in deep linking, set `flutter_deeplinking_enabled` to `false` in `AndroidManifest.xml` (and `FlutterDeepLinkingEnabled` to `NO` in `Info.plist`) so the router doesn't also try to open the link's path.
 
 ```dart
 // Handle deep links when app is running or opened from background

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'link_forty_logger.dart';
 import 'models/link_forty_config.dart';
@@ -61,6 +62,7 @@ class LinkForty {
   AttributionContext? _attributionContext;
   EventTracker? _eventTracker;
   DeepLinkHandler? _deepLinkHandler;
+  StreamSubscription<Uri>? _incomingLinkSubscription;
 
   final Completer<void> _initializationCompleter = Completer<void>();
   bool _isInitialized = false;
@@ -77,11 +79,22 @@ class LinkForty {
   /// Parameters:
   /// - [config]: The SDK configuration object.
   /// - [attributionWindowHours]: The duration in hours to look back for clicks.
-  ///   Defaults to 168 hours (7 days).
+  ///   Overrides [LinkFortyConfig.attributionWindowHours] when given.
   /// - [deviceId]: An optional unique device identifier for high-confidence matching.
   /// - [networkManager]: For testing - allows injecting a mock network layer.
   /// - [storageManager]: For testing - allows injecting a mock storage layer.
   /// - [fingerprintCollector]: For testing - allows injecting a mock collector.
+  /// - [incomingLinks]: For testing - replaces the platform's stream of
+  ///   incoming App Links / Universal Links / custom-scheme URLs.
+  ///
+  /// The SDK starts listening for incoming links here, including the link
+  /// that launched the app, and passes each one to [onDeepLink] callbacks. A
+  /// link that arrives before any callback is registered is held and
+  /// delivered to the first one, so registering after `initialize()` returns
+  /// is fine.
+  ///
+  /// Once the install has been reported, [onDeferredDeepLink] callbacks
+  /// receive its attribution data, or `null` for an organic install.
   ///
   /// Returns an [InstallResponse] containing attribution results.
   ///
@@ -89,11 +102,12 @@ class LinkForty {
   /// Throws [LinkFortyError] if initialization or initial attribution fails.
   static Future<InstallResponse> initialize({
     required LinkFortyConfig config,
-    int attributionWindowHours = 168,
+    int? attributionWindowHours,
     String? deviceId,
     @visibleForTesting NetworkManagerProtocol? networkManager,
     @visibleForTesting StorageManagerProtocol? storageManager,
     @visibleForTesting FingerprintCollectorProtocol? fingerprintCollector,
+    @visibleForTesting Stream<Uri>? incomingLinks,
   }) async {
     if (_instance != null) {
       throw const AlreadyInitializedError();
@@ -146,17 +160,20 @@ class LinkForty {
     _instance = sdk;
     sdk._initializationCompleter.complete();
 
+    sdk._listenForIncomingLinks(incomingLinks ?? AppLinks().uriLinkStream);
+
+    final isNewInstall = effectiveStorageManager.getInstallId() == null;
     final response = await sdk._attributionManager!.reportInstall(
-      attributionWindowHours: attributionWindowHours,
+      attributionWindowHours:
+          attributionWindowHours ?? config.attributionWindowHours,
       deviceId: deviceId,
       appToken: config.appToken,
     );
 
-    if (response.attributed && response.deepLinkData != null) {
-      await sdk._deepLinkHandler?.deliverDeferredDeepLink(
-        response.deepLinkData,
-      );
-    }
+    await sdk._deepLinkHandler?.deliverDeferredDeepLink(
+      response.attributed ? response.deepLinkData : null,
+      isNewInstall: isNewInstall,
+    );
 
     LinkFortyLogger.log(
       'SDK initialized successfully (attributed: ${response.attributed})',
@@ -167,10 +184,34 @@ class LinkForty {
 
   // MARK: - Deep Linking
 
+  /// Passes each incoming link to the deep link handler.
+  ///
+  /// The stream emits the link that launched the app as well as links opened
+  /// while it runs. A platform without link support only loses direct deep
+  /// links, so a failure here is logged rather than thrown.
+  void _listenForIncomingLinks(Stream<Uri> links) {
+    try {
+      _incomingLinkSubscription = links.listen(
+        (uri) {
+          _deepLinkHandler?.handleDeepLink(uri).catchError((Object e) {
+            LinkFortyLogger.log('Failed to handle incoming link $uri: $e');
+          });
+        },
+        onError: (Object e) {
+          LinkFortyLogger.log('Incoming link stream error: $e');
+        },
+      );
+    } catch (e) {
+      LinkFortyLogger.log('Could not listen for incoming links: $e');
+    }
+  }
+
   /// Processes a deep link [uri] manually.
   ///
-  /// Use this if you are handling incoming links via your own platform channel
-  /// instead of the SDK's built-in automatic handling.
+  /// The SDK already handles incoming App Links, Universal Links and
+  /// custom-scheme URLs. Use this for a link that reaches the app some other
+  /// way, such as a push notification payload. The same URL handled twice in
+  /// quick succession is delivered once.
   Future<void> handleDeepLink(Uri uri) async {
     if (!_isInitialized) {
       LinkFortyLogger.log('SDK not initialized. Call initialize() first.');
@@ -179,9 +220,12 @@ class LinkForty {
     await _deepLinkHandler?.handleDeepLink(uri);
   }
 
-  /// Sets a [callback] to be invoked when a deferred deep link is resolved.
+  /// Sets a [callback] to be invoked with the install's attribution.
   ///
-  /// Deferred links are those clicked before the app was installed.
+  /// Deferred links are those clicked before the app was installed. The
+  /// callback receives the link's data, or `null` for an organic install. It
+  /// is called on every launch, with the attribution recorded at install, and
+  /// a callback registered after [initialize] returns is called immediately.
   void onDeferredDeepLink(DeferredDeepLinkCallback callback) {
     if (!_isInitialized) {
       LinkFortyLogger.log('SDK not initialized. Call initialize() first.');
@@ -192,7 +236,9 @@ class LinkForty {
 
   /// Sets a [callback] to be invoked when a direct deep link is opened.
   ///
-  /// Direct links are those clicked while the app is already installed.
+  /// Direct links are those clicked while the app is already installed. The
+  /// link that launched the app is delivered too, even when the callback is
+  /// registered after [initialize] returns.
   void onDeepLink(DeepLinkCallback callback) {
     if (!_isInitialized) {
       LinkFortyLogger.log('SDK not initialized. Call initialize() first.');
@@ -387,6 +433,19 @@ class LinkForty {
   /// This is primarily used for testing or re-configuring the SDK.
   /// It does **not** clear persistent data from storage; call [clearData] for that.
   void reset() {
+    final subscription = _incomingLinkSubscription;
+    _incomingLinkSubscription = null;
+    if (subscription != null) {
+      try {
+        unawaited(
+          subscription.cancel().catchError((Object e) {
+            LinkFortyLogger.log('Failed to stop listening for links: $e');
+          }),
+        );
+      } catch (e) {
+        LinkFortyLogger.log('Failed to stop listening for links: $e');
+      }
+    }
     _config = null;
     _networkManager = null;
     _attributionManager = null;

@@ -59,8 +59,12 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
         debug: true,
       );
 
-      // Register callbacks before initialization
-      LinkForty.instanceOrNull?.onDeferredDeepLink((data) {
+      // Initialize SDK
+      final response = await LinkForty.initialize(config: config);
+
+      // Register callbacks. The link that launched the app is held until the
+      // first onDeepLink callback is registered, so registering here is fine.
+      LinkForty.instance.onDeferredDeepLink((data) {
         if (!mounted) return;
         setState(() {
           _deepLinkData = data;
@@ -68,7 +72,7 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
         debugPrint('📱 Deferred deep link received: $data');
       });
 
-      LinkForty.instanceOrNull?.onDeepLink((uri, data) {
+      LinkForty.instance.onDeepLink((uri, data) {
         if (!mounted) return;
         setState(() {
           _deepLinkData = data;
@@ -76,9 +80,6 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
         debugPrint('🔗 Deep link opened: $uri');
         debugPrint('   Data: $data');
       });
-
-      // Initialize SDK
-      final response = await LinkForty.initialize(config: config);
 
       if (!mounted) return;
       setState(() {

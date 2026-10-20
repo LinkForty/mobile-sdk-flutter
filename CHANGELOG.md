@@ -1,3 +1,13 @@
+## 0.3.0
+
+* **The SDK now handles incoming links itself.** `initialize()` listens for App Links, Universal Links and custom-scheme URLs through `app_links`, including the link that launched the app from a terminated state, and delivers each to `onDeepLink` callbacks with the server-resolved link data.
+* A link that arrives before any `onDeepLink` callback is registered is held and delivered to the callbacks registered by the next microtask, so registering after `await LinkForty.initialize(...)` receives the launch link.
+* **Behavior change:** the same URL passed to `handleDeepLink()` again within 10 seconds is ignored. An app that already forwards links from its own `app_links` listener gets each link once rather than twice; that listener can now be removed.
+* **`onDeferredDeepLink` is called with `null` for an organic install**, so an app can tell an organic install from one not yet reported.
+* `LinkFortyConfig.attributionWindowHours` is now used when reporting the install. The `attributionWindowHours` argument to `initialize()` overrides it when given.
+* Last-click attribution: the install link is recorded only on the launch that reports the install, and not over a direct deep link opened on that same launch.
+* The example app registers its callbacks after `initialize()`.
+
 ## 0.2.3
 
 * **Fixed:** in-app events, screen views and revenue events are accepted by the event endpoint. The event `timestamp` is sent in UTC (ISO 8601 with a trailing `Z`), and attribution fields with no value (`attributedLinkId`, `attributedClickId`, `linkOpenedAt`, `sessionId`) are left out of the request instead of being sent as `null`. Events already queued on a device are sent in the corrected form when the queue is flushed. Thanks to [@arman-uc](https://github.com/arman-uc) ([#11](https://github.com/LinkForty/mobile-sdk-flutter/pull/11), fixes [#10](https://github.com/LinkForty/mobile-sdk-flutter/issues/10)).
