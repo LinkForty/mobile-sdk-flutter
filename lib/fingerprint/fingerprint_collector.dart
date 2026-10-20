@@ -132,8 +132,17 @@ class FingerprintCollector implements FingerprintCollectorProtocol {
   }
 
   /// Gets language identifier (e.g., "en-US")
-  String _getLanguage() {
-    final locale = ui.PlatformDispatcher.instance.locale;
+  String _getLanguage() => languageTag(ui.PlatformDispatcher.instance.locale);
+
+  /// The language reported in the fingerprint: `language` or
+  /// `language-REGION` (`en-ES`, `zh-CN`, `es-419`).
+  ///
+  /// The engine delivers the device locale already split into language,
+  /// script and country, without the platform's extensions (Android's
+  /// `-u-fw-mon-mu-celsius`, iOS's `@rg=` keywords). The script is left out
+  /// so the value matches what a browser on the same device reports.
+  @visibleForTesting
+  static String languageTag(ui.Locale locale) {
     final countryCode = locale.countryCode;
     if (countryCode != null && countryCode.isNotEmpty) {
       return '${locale.languageCode}-$countryCode';
