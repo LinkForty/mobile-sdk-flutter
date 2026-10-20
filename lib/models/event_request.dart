@@ -55,14 +55,18 @@ class EventRequest {
     this.attributedClickId,
     this.linkOpenedAt,
     this.sessionId,
-  }) : timestamp = (timestamp ?? DateTime.now()).toIso8601String();
+  }) : timestamp = (timestamp ?? DateTime.now()).toUtc().toIso8601String();
 
   /// JSON deserialization
   factory EventRequest.fromJson(Map<String, dynamic> json) =>
       _$EventRequestFromJson(json);
 
   /// JSON serialization
-  Map<String, dynamic> toJson() => _$EventRequestToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = _$EventRequestToJson(this);
+    map.removeWhere((key, value) => value == null);
+    return map;
+  }
 
   /// Ensures eventData values are JSON-serializable
   static Map<String, dynamic> _eventDataFromJson(Map<String, dynamic> json) {

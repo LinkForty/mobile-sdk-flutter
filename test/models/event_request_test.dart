@@ -68,5 +68,58 @@ void main() {
       expect(req1, equals(req2));
       expect(req1, isNot(equals(req3)));
     });
+
+    test('timestamp is formatted in UTC ISO 8601 with Z suffix', () {
+      final request = EventRequest(
+        installId: 'inst_1',
+        eventName: 'test_event',
+        eventData: {},
+      );
+      expect(request.timestamp.endsWith('Z'), isTrue);
+    });
+
+    test('custom timestamp is converted to UTC ISO 8601 with Z suffix', () {
+      final localTime = DateTime(2026, 9, 15, 12, 35, 19);
+      final request = EventRequest(
+        installId: 'inst_1',
+        eventName: 'test_event',
+        eventData: {},
+        timestamp: localTime,
+      );
+      expect(request.timestamp.endsWith('Z'), isTrue);
+      expect(request.timestamp, localTime.toUtc().toIso8601String());
+    });
+
+    test('omits null attribution and session keys from JSON', () {
+      final request = EventRequest(
+        installId: 'inst_1',
+        eventName: 'organic_event',
+        eventData: {'screen': 'home'},
+      );
+      final json = request.toJson();
+
+      expect(json.containsKey('attributedLinkId'), isFalse);
+      expect(json.containsKey('attributedClickId'), isFalse);
+      expect(json.containsKey('linkOpenedAt'), isFalse);
+      expect(json.containsKey('sessionId'), isFalse);
+    });
+
+    test('includes attribution and session keys when provided', () {
+      final request = EventRequest(
+        installId: 'inst_1',
+        eventName: 'attributed_event',
+        eventData: {'screen': 'product'},
+        attributedLinkId: 'link_123',
+        attributedClickId: 'click_456',
+        linkOpenedAt: '2026-09-15T12:00:00.000Z',
+        sessionId: 'sess_789',
+      );
+      final json = request.toJson();
+
+      expect(json['attributedLinkId'], 'link_123');
+      expect(json['attributedClickId'], 'click_456');
+      expect(json['linkOpenedAt'], '2026-09-15T12:00:00.000Z');
+      expect(json['sessionId'], 'sess_789');
+    });
   });
 }
