@@ -46,6 +46,26 @@ class DeepLinkHandler {
   /// Cached deferred deep link data
   DeepLinkData? _cachedDeferredDeepLink;
 
+  /// A direct deep link that arrived before any [onDeepLink] callback was
+  /// registered. Held so a link that launched the app reaches callbacks that
+  /// are registered after `initialize()` returns.
+  ({Uri uri, DeepLinkData? data})? _pendingDeepLink;
+
+  /// Whether a direct open has been recorded for last-click attribution.
+  bool _directOpenRecorded = false;
+
+  /// The most recent URL passed to [handleDeepLink], and when.
+  Uri? _lastHandledUri;
+  DateTime? _lastHandledAt;
+
+  /// The same URL handled again within this window is treated as one open.
+  ///
+  /// The SDK listens for incoming links itself, and an app may also pass the
+  /// launch link to [handleDeepLink] (which was required before the SDK did
+  /// this). The window is long enough to cover the app making that call after
+  /// `initialize()` returns on a slow network.
+  static const duplicateWindow = Duration(seconds: 10);
+
   // MARK: - Configuration
 
   /// Configures the handler with the necessary components for server-side
@@ -84,12 +104,23 @@ class DeepLinkHandler {
   /// Delivers deferred deep link data to all registered callbacks
   ///
   /// - [deepLinkData]: Deep link data from attribution, null for organic
-  Future<void> deliverDeferredDeepLink(DeepLinkData? deepLinkData) async {
+  /// - [isNewInstall]: Whether the install was reported on this launch, rather
+  ///   than loaded from the cache. Only then is it an open for last-click
+  ///   attribution.
+  Future<void> deliverDeferredDeepLink(
+    DeepLinkData? deepLinkData, {
+    bool isNewInstall = true,
+  }) async {
     _cachedDeferredDeepLink = deepLinkData;
     _deferredDeepLinkDelivered = true;
 
-    // Pin last-click attribution to this deferred (install) open.
-    await _attributionContext?.recordDeepLinkOpen(linkId: deepLinkData?.linkId);
+    // Pin last-click attribution to this deferred (install) open, unless a
+    // direct open has already been recorded: that is the newer of the two.
+    if (isNewInstall && !_directOpenRecorded) {
+      await _attributionContext?.recordDeepLinkOpen(
+        linkId: deepLinkData?.linkId,
+      );
+    }
 
     LinkFortyLogger.log(
       'Delivering deferred deep link: ${deepLinkData?.shortCode ?? "organic"}',
@@ -111,8 +142,25 @@ class DeepLinkHandler {
   /// Registers a callback for direct deep links
   ///
   /// - [callback]: Callback to invoke when app is opened via deep link
+  ///
+  /// If a link was handled before any callback was registered (typically the
+  /// link that launched the app), it is delivered in a microtask to every
+  /// callback registered by then, once.
   void onDeepLink(DeepLinkCallback callback) {
+    final pending = _pendingDeepLink;
+    final isFirstCallback = _deepLinkCallbacks.isEmpty;
     _deepLinkCallbacks.add(callback);
+
+    if (pending != null && isFirstCallback) {
+      Future.microtask(() {
+        if (!identical(_pendingDeepLink, pending)) return;
+        _pendingDeepLink = null;
+        final callbacks = List<DeepLinkCallback>.from(_deepLinkCallbacks);
+        for (final cb in callbacks) {
+          cb(pending.uri, pending.data);
+        }
+      });
+    }
   }
 
   /// Resolves the provided [uri] to extract [DeepLinkData].
@@ -120,7 +168,21 @@ class DeepLinkHandler {
   /// It first attempts to resolve the URL via the LinkForty backend to get
   /// full campaign metadata. If the network request fails or the SDK is not
   /// configured for server-side resolution, it falls back to parsing the URL locally.
+  ///
+  /// A URL identical to the previous one, handled within [duplicateWindow], is
+  /// ignored.
   Future<void> handleDeepLink(Uri uri) async {
+    final now = DateTime.now();
+    final lastAt = _lastHandledAt;
+    if (uri == _lastHandledUri &&
+        lastAt != null &&
+        now.difference(lastAt) < duplicateWindow) {
+      LinkFortyLogger.log('Ignoring repeat of deep link already handled: $uri');
+      return;
+    }
+    _lastHandledUri = uri;
+    _lastHandledAt = now;
+
     LinkFortyLogger.log('Handling deep link: $uri');
 
     final localData = URLParser.parseDeepLink(uri);
@@ -135,12 +197,18 @@ class DeepLinkHandler {
     if (resolvedData != null) {
       // Pin last-click attribution to this direct (re-engagement) open;
       // supersedes any prior context. Organic/unresolved opens are a no-op.
+      if (resolvedData.linkId != null) _directOpenRecorded = true;
       await _attributionContext?.recordDeepLinkOpen(
         linkId: resolvedData.linkId,
       );
       LinkFortyLogger.log('Parsed deep link: $resolvedData');
     } else {
       LinkFortyLogger.log('Failed to parse deep link URL');
+    }
+
+    if (callbacks.isEmpty) {
+      _pendingDeepLink = (uri: uri, data: resolvedData);
+      return;
     }
 
     for (final callback in callbacks) {
@@ -156,6 +224,10 @@ class DeepLinkHandler {
     _deepLinkCallbacks.clear();
     _deferredDeepLinkDelivered = false;
     _cachedDeferredDeepLink = null;
+    _pendingDeepLink = null;
+    _directOpenRecorded = false;
+    _lastHandledUri = null;
+    _lastHandledAt = null;
   }
 
   // MARK: - Private Methods
