@@ -2,7 +2,6 @@
 
 * **Fixed:** installs reported without a `deviceId` are recorded and attributed. The field is left out of the install request when there is no value, instead of being sent as `null`, which the install endpoint rejects. Recommended for every app that doesn't pass `deviceId` to `initialize()`: deferred deep links depend on it.
 * **Fixed:** the fingerprint reports the device's IANA timezone (for example `America/Los_Angeles`) instead of an abbreviation (`PDT`), so it matches the timezone the server records for a browser click and counts toward install attribution. The timezone is read through the [`flutter_timezone`](https://pub.dev/packages/flutter_timezone) plugin, which replaces the `timezone` package; the abbreviation is still sent on a platform that can't report an identifier.
-* The declared minimums are now Flutter 3.38.1 and Dart 3.10, the versions the SDK's dependencies already required.
 
 ## 0.3.0
 

@@ -22,8 +22,8 @@
 
 ## Requirements
 
-- Flutter 3.38.1+
-- Dart 3.10+
+- Flutter 3.10+
+- Dart 3.0+
 - iOS 12.0+
 - Android API 21+
 
