@@ -1,3 +1,7 @@
+## 0.2.3
+
+* **Fixed:** in-app events, screen views and revenue events are accepted by the event endpoint. The event `timestamp` is sent in UTC (ISO 8601 with a trailing `Z`), and attribution fields with no value (`attributedLinkId`, `attributedClickId`, `linkOpenedAt`, `sessionId`) are left out of the request instead of being sent as `null`. Events already queued on a device are sent in the corrected form when the queue is flushed. Thanks to [@arman-uc](https://github.com/arman-uc) ([#11](https://github.com/LinkForty/mobile-sdk-flutter/pull/11), fixes [#10](https://github.com/LinkForty/mobile-sdk-flutter/issues/10)).
+
 ## 0.2.2
 
 * **Fixed:** `InstallResponse.fromJson` no longer throws when the backend returns `deepLinkData: {}` for an organic (unattributed) install, which surfaced as an error out of `initialize()`. An empty — or otherwise unusable — `deepLinkData` object is now treated as "no deep link" (`null`), the same as an explicit `null`.
