@@ -72,7 +72,14 @@ class DeviceFingerprint {
       _$DeviceFingerprintFromJson(json);
 
   /// JSON serialization
-  Map<String, dynamic> toJson() => _$DeviceFingerprintToJson(this);
+  ///
+  /// Fields with no value are left out: the install endpoint accepts a missing
+  /// `deviceId` but rejects `null`.
+  Map<String, dynamic> toJson() {
+    final map = _$DeviceFingerprintToJson(this);
+    map.removeWhere((key, value) => value == null);
+    return map;
+  }
 
   @override
   String toString() {

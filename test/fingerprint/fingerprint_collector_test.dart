@@ -1,5 +1,6 @@
 import 'dart:ui' show Locale;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -23,6 +24,8 @@ import 'fingerprint_collector_test.mocks.dart';
   IosDeviceInfo,
 ])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockDeviceInfoPlugin mockDeviceInfo;
   late MockPackageInfo mockPackageInfo;
   late FingerprintCollector collector;
@@ -51,6 +54,35 @@ void main() {
   test('collects basic fingerprint info', () async {
     // Basic smoke test to ensure constructor works with mocked dependencies
     expect(collector, isNotNull);
+  });
+
+  group('localTimezone', () {
+    const channel = MethodChannel('flutter_timezone');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    test('reports the IANA identifier from the platform', () async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        expect(call.method, 'getLocalTimezone');
+        return {'identifier': 'Asia/Kolkata'};
+      });
+
+      expect(await FingerprintCollector.localTimezone(), 'Asia/Kolkata');
+    });
+
+    test('falls back to the abbreviation when the platform cannot answer',
+        () async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        throw PlatformException(code: 'unavailable');
+      });
+
+      expect(
+        await FingerprintCollector.localTimezone(),
+        DateTime.now().timeZoneName,
+      );
+    });
   });
 
   group('languageTag', () {
