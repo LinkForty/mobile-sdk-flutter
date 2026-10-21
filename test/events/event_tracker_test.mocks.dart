@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i2;
 
 import 'package:linkforty_flutter/events/event_queue.dart' as _i9;
@@ -229,6 +230,15 @@ class MockEventQueue extends _i1.Mock implements _i9.EventQueue {
         ),
         returnValue: false,
       ) as bool);
+
+  @override
+  void requeueFront(List<_i8.EventRequest>? events) => super.noSuchMethod(
+        Invocation.method(
+          #requeueFront,
+          [events],
+        ),
+        returnValueForMissingStub: null,
+      );
 
   @override
   List<_i8.EventRequest> peek() => (super.noSuchMethod(

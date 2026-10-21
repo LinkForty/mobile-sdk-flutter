@@ -8,10 +8,12 @@ part of 'event_response.dart';
 
 EventResponse _$EventResponseFromJson(Map<String, dynamic> json) =>
     EventResponse(
-      success: json['success'] as bool,
+      eventId: json['eventId'] as String?,
+      acknowledged: json['acknowledged'] as bool?,
     );
 
 Map<String, dynamic> _$EventResponseToJson(EventResponse instance) =>
     <String, dynamic>{
-      'success': instance.success,
+      'eventId': instance.eventId,
+      'acknowledged': instance.acknowledged,
     };

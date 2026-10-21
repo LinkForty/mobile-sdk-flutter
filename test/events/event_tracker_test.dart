@@ -72,7 +72,8 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async => const EventResponse(success: true));
+      ).thenAnswer((_) async =>
+          const EventResponse(eventId: 'evt-1', acknowledged: true));
 
       await eventTracker.trackEvent('test', {'key': 'value'});
 
@@ -105,7 +106,8 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async => const EventResponse(success: true));
+      ).thenAnswer((_) async =>
+          const EventResponse(eventId: 'evt-1', acknowledged: true));
 
       // A deep link opens the app, then the user does something.
       await attributionContext.recordDeepLinkOpen(
@@ -144,7 +146,8 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async => const EventResponse(success: true));
+      ).thenAnswer((_) async =>
+          const EventResponse(eventId: 'evt-1', acknowledged: true));
 
       await eventTracker.trackScreenView('Home');
       await eventTracker.trackScreenView('ProductDetail');
@@ -218,7 +221,8 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async => const EventResponse(success: true));
+      ).thenAnswer((_) async =>
+          const EventResponse(eventId: 'evt-1', acknowledged: true));
 
       await eventTracker.trackRevenue(amount: 10.0, currency: 'USD');
 
@@ -270,7 +274,8 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async => const EventResponse(success: true));
+      ).thenAnswer((_) async =>
+          const EventResponse(eventId: 'evt-1', acknowledged: true));
 
       await eventTracker.flushQueue();
 
@@ -314,8 +319,9 @@ void main() {
 
       await eventTracker.flushQueue();
 
-      // Should requeue
-      verify(mockQueue.enqueue(event1)).called(1);
+      // Should put it back at the head of the queue
+      verify(mockQueue.requeueFront([event1])).called(1);
+      verifyNever(mockQueue.enqueue(any));
     });
 
     test(

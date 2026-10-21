@@ -1,3 +1,9 @@
+## 0.3.2
+
+* **Fixed:** `trackEvent`, `trackRevenue` and `trackScreenView` succeed when the server stores the event. The event endpoint replies `{"eventId", "acknowledged"}`, and the SDK expected a `success` field it has never sent, so every call threw a `DecodingError` after the event was stored, queued it, and sent it again on each flush and on later launches, from the persisted queue. Events queued on a device by earlier versions are sent once more and then leave the queue.
+* An event is queued only when it may succeed later (no connection, or a 5xx response). An event the server rejects with a 4xx is reported and not queued, and a queued event the server rejects is dropped instead of being retried on every flush.
+* A queued event that fails again keeps its place at the head of the queue, so events are sent in the order they were tracked.
+
 ## 0.3.1
 
 * **Fixed:** installs reported without a `deviceId` are recorded and attributed. The field is left out of the install request when there is no value, instead of being sent as `null`, which the install endpoint rejects. Recommended for every app that doesn't pass `deviceId` to `initialize()`: deferred deep links depend on it.
