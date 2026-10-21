@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:json_annotation/json_annotation.dart';
+import 'match_certainty_json.dart';
 import 'utm_parameters.dart';
 
 part 'deep_link_data.g.dart';
@@ -51,6 +52,38 @@ class DeepLinkData {
   /// The link ID from the backend
   final String? linkId;
 
+  /// Confidence of the install match (0-100).
+  ///
+  /// Set on the deferred deep link of an attributed install; `null` on a
+  /// direct open.
+  @JsonKey(fromJson: doubleFromJsonOrNull)
+  final double? confidenceScore;
+
+  /// Which fingerprint factors matched the click.
+  ///
+  /// Set on the deferred deep link of an attributed install; `null` on a
+  /// direct open.
+  @JsonKey(fromJson: stringListFromJsonOrNull)
+  final List<String>? matchedFactors;
+
+  /// How the install was matched to the click (`"fingerprint"`).
+  ///
+  /// Set on the deferred deep link of an attributed install; `null` on a
+  /// direct open.
+  @JsonKey(fromJson: stringFromJsonOrNull)
+  final String? attributionMethod;
+
+  /// How many other links had a click from the install's network that also
+  /// reached the confidence threshold. `0` means no other link was in
+  /// contention; above `0`, another device's tap may be what led to this
+  /// install, so an app acting on a sensitive link (sign-in, a gift) can treat
+  /// the match as unverified, for example by asking the user to confirm.
+  ///
+  /// Set on the deferred deep link of an attributed install; `null` on a
+  /// direct open.
+  @JsonKey(fromJson: intFromJsonOrNull)
+  final int? competingLinks;
+
   /// Creates deep link data
   const DeepLinkData({
     required this.shortCode,
@@ -63,6 +96,10 @@ class DeepLinkData {
     this.appScheme,
     this.clickedAt,
     this.linkId,
+    this.confidenceScore,
+    this.matchedFactors,
+    this.attributionMethod,
+    this.competingLinks,
   });
 
   /// Returns a copy with the parameters carried on the opened URL merged in.
@@ -94,6 +131,10 @@ class DeepLinkData {
       appScheme: appScheme,
       clickedAt: clickedAt,
       linkId: linkId,
+      confidenceScore: confidenceScore,
+      matchedFactors: matchedFactors,
+      attributionMethod: attributionMethod,
+      competingLinks: competingLinks,
     );
   }
 
@@ -127,7 +168,11 @@ class DeepLinkData {
     deepLinkPath: ${deepLinkPath ?? 'null'},
     appScheme: ${appScheme ?? 'null'},
     linkId: ${linkId ?? 'null'},
-    utmSource: ${utmParameters?.source ?? 'null'}
+    utmSource: ${utmParameters?.source ?? 'null'},
+    confidenceScore: ${confidenceScore ?? 'null'},
+    matchedFactors: ${matchedFactors ?? 'null'},
+    attributionMethod: ${attributionMethod ?? 'null'},
+    competingLinks: ${competingLinks ?? 'null'}
 )''';
   }
 
@@ -145,7 +190,11 @@ class DeepLinkData {
           deepLinkPath == other.deepLinkPath &&
           appScheme == other.appScheme &&
           clickedAt == other.clickedAt &&
-          linkId == other.linkId;
+          linkId == other.linkId &&
+          confidenceScore == other.confidenceScore &&
+          _listEquals(matchedFactors, other.matchedFactors) &&
+          attributionMethod == other.attributionMethod &&
+          competingLinks == other.competingLinks;
 
   @override
   int get hashCode =>
@@ -158,7 +207,11 @@ class DeepLinkData {
       deepLinkPath.hashCode ^
       appScheme.hashCode ^
       clickedAt.hashCode ^
-      linkId.hashCode;
+      linkId.hashCode ^
+      confidenceScore.hashCode ^
+      _listHashCode(matchedFactors) ^
+      attributionMethod.hashCode ^
+      competingLinks.hashCode;
 
   /// Helper for map equality comparison
   static bool _mapEquals(Map<String, String>? a, Map<String, String>? b) {
@@ -169,6 +222,23 @@ class DeepLinkData {
       if (a[key] != b[key]) return false;
     }
     return true;
+  }
+
+  /// Helper for list equality comparison
+  static bool _listEquals(List<String>? a, List<String>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  /// Helper for list hash code
+  static int _listHashCode(List<String>? list) {
+    if (list == null) return 0;
+    return list.fold(0, (hash, item) => hash ^ item.hashCode);
   }
 
   /// Helper for map hash code

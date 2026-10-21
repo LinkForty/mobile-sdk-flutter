@@ -33,7 +33,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.4.0
+  linkforty_flutter: ^0.5.0
 ```
 
 Or run:
@@ -97,6 +97,34 @@ LinkForty.instance.onDeferredDeepLink((deepLinkData) {
   }
 });
 ```
+
+#### How certain is the match?
+
+A deferred deep link is matched to a click by device fingerprint, so `DeepLinkData` also carries the match details:
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `confidenceScore` | `double?` | Confidence of the match, 0-100. |
+| `matchedFactors` | `List<String>?` | Which fingerprint factors matched the click. |
+| `attributionMethod` | `String?` | How the install was matched (`"fingerprint"`). |
+| `competingLinks` | `int?` | How many other links had a click from the install's network that also reached the confidence threshold. |
+
+`competingLinks` is `0` when no other link was in contention. Above `0`, another device's tap may be what led to this install, so an app acting on a sensitive link (a sign-in, a gift) can treat the match as unverified, for example by asking the user to confirm:
+
+```dart
+LinkForty.instance.onDeferredDeepLink((deepLinkData) {
+  if (deepLinkData == null) return;
+
+  if ((deepLinkData.competingLinks ?? 0) > 0) {
+    // Ask the user to confirm before redeeming the invite.
+    showConfirmInviteDialog(deepLinkData);
+  } else {
+    redeemInvite(deepLinkData);
+  }
+});
+```
+
+These fields are `null` on a direct deep link (`onDeepLink`), which is not a fingerprint match. The `InstallResponse` returned by `initialize()` carries `attributionMethod` (`"fingerprint"`, or `"none"` for an organic install) and `competingLinks` as well, on the launch that reports the install; on later launches both are `null`.
 
 ### 3. Handle Direct Deep Links (Universal Links / App Links)
 

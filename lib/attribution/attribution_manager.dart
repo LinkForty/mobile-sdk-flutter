@@ -62,6 +62,9 @@ class AttributionManager {
       LinkFortyLogger.log(
         'Subsequent launch — loading cached attribution (installId: $storedInstallId)',
       );
+      // Only the launch that reports the install receives the server's match
+      // details; attributionMethod and competingLinks stay null (unknown) here.
+      // The cached deep link keeps the values it was saved with.
       return InstallResponse(
         installId: storedInstallId,
         attributed: cachedData != null,

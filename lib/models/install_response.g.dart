@@ -15,6 +15,8 @@ InstallResponse _$InstallResponseFromJson(Map<String, dynamic> json) =>
           .map((e) => e as String)
           .toList(),
       deepLinkData: InstallResponse._deepLinkDataFromJson(json['deepLinkData']),
+      attributionMethod: stringFromJsonOrNull(json['attributionMethod']),
+      competingLinks: intFromJsonOrNull(json['competingLinks']),
     );
 
 Map<String, dynamic> _$InstallResponseToJson(InstallResponse instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$InstallResponseToJson(InstallResponse instance) =>
       'confidenceScore': instance.confidenceScore,
       'matchedFactors': instance.matchedFactors,
       'deepLinkData': instance.deepLinkData?.toJson(),
+      'attributionMethod': instance.attributionMethod,
+      'competingLinks': instance.competingLinks,
     };

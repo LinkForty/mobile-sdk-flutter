@@ -203,6 +203,9 @@ void main() {
         expect(result.installId, 'inst_cached');
         expect(result.attributed, isTrue);
         expect(result.deepLinkData?.shortCode, 'xyz');
+        // The server's match details are not re-reported on later launches.
+        expect(result.attributionMethod, isNull);
+        expect(result.competingLinks, isNull);
 
         // Must not make any network call
         verifyNever(
