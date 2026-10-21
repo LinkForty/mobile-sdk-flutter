@@ -23,6 +23,10 @@ DeepLinkData _$DeepLinkDataFromJson(Map<String, dynamic> json) => DeepLinkData(
       appScheme: json['appScheme'] as String?,
       clickedAt: DeepLinkData._dateTimeFromJson(json['clickedAt'] as String?),
       linkId: json['linkId'] as String?,
+      confidenceScore: doubleFromJsonOrNull(json['confidenceScore']),
+      matchedFactors: stringListFromJsonOrNull(json['matchedFactors']),
+      attributionMethod: stringFromJsonOrNull(json['attributionMethod']),
+      competingLinks: intFromJsonOrNull(json['competingLinks']),
     );
 
 Map<String, dynamic> _$DeepLinkDataToJson(DeepLinkData instance) =>
@@ -37,4 +41,8 @@ Map<String, dynamic> _$DeepLinkDataToJson(DeepLinkData instance) =>
       'appScheme': instance.appScheme,
       'clickedAt': DeepLinkData._dateTimeToJson(instance.clickedAt),
       'linkId': instance.linkId,
+      'confidenceScore': instance.confidenceScore,
+      'matchedFactors': instance.matchedFactors,
+      'attributionMethod': instance.attributionMethod,
+      'competingLinks': instance.competingLinks,
     };

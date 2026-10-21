@@ -1,3 +1,10 @@
+## 0.5.0
+
+* **Install-match certainty.** The deferred deep link passed to `onDeferredDeepLink` now carries `confidenceScore`, `matchedFactors`, `attributionMethod` (`"fingerprint"`) and `competingLinks`. `competingLinks` counts the other links that had a click from the install's network that also reached the confidence threshold: `0` means no other link was in contention, and above `0` another device's tap may be what led to the install, so an app acting on a sensitive link (a sign-in, a gift) can ask the user to confirm. All four are `null` on a direct deep link.
+* `InstallResponse` has `attributionMethod` (`"fingerprint"` or `"none"`) and `competingLinks` on the launch that reports the install. They are `null` on later launches, and when the server does not send them.
+* The new fields are stored with the install's deep link, so `getInstallData()` returns them on later launches. Install data saved by earlier versions still loads, with the new fields `null`.
+* An unexpected value in any of these fields is read as `null`, without affecting the rest of the response.
+
 ## 0.4.0
 
 * **Behavior change:** `onDeferredDeepLink` is called once, on the launch that reports the install, with the link the app was installed from or `null` for an organic install. It was called on every launch with the attribution recorded at install, so an app had to record that it had handled the link itself. Later launches don't call it; the attribution stays available from `getInstallData()`. If your app kept its own "already handled" flag for the deferred deep link, it can be removed. This matches the iOS, Android, React Native and Expo SDKs.

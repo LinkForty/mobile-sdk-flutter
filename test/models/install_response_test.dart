@@ -96,6 +96,99 @@ void main() {
       expect(response.deepLinkData?.clickedAt, isNotNull);
     });
 
+    test('reads attributionMethod and competingLinks on a match', () {
+      final response = InstallResponse.fromJson({
+        'installId': 'inst_789',
+        'attributed': true,
+        'confidenceScore': 85,
+        'matchedFactors': ['ip', 'ua'],
+        'attributionMethod': 'fingerprint',
+        'competingLinks': 2,
+        'deepLinkData': {
+          'shortCode': 'abc123',
+          'confidenceScore': 85,
+          'matchedFactors': ['ip', 'ua'],
+          'attributionMethod': 'fingerprint',
+          'competingLinks': 2,
+        },
+      });
+
+      expect(response.attributionMethod, 'fingerprint');
+      expect(response.competingLinks, 2);
+      expect(response.deepLinkData?.confidenceScore, 85.0);
+      expect(response.deepLinkData?.matchedFactors, ['ip', 'ua']);
+      expect(response.deepLinkData?.attributionMethod, 'fingerprint');
+      expect(response.deepLinkData?.competingLinks, 2);
+    });
+
+    test('reads an organic response with attributionMethod none', () {
+      final response = InstallResponse.fromJson({
+        'installId': 'inst_456',
+        'attributed': false,
+        'confidenceScore': 0,
+        'matchedFactors': <String>[],
+        'attributionMethod': 'none',
+        'competingLinks': 0,
+        'deepLinkData': <String, dynamic>{},
+      });
+
+      expect(response.attributionMethod, 'none');
+      expect(response.competingLinks, 0);
+      expect(response.deepLinkData, isNull);
+    });
+
+    test('leaves attributionMethod and competingLinks null when absent', () {
+      final response = InstallResponse.fromJson({
+        'installId': 'inst_456',
+        'attributed': false,
+        'confidenceScore': 0,
+        'matchedFactors': <String>[],
+      });
+
+      expect(response.attributionMethod, isNull);
+      expect(response.competingLinks, isNull);
+    });
+
+    test('reads competingLinks sent as a double as an int', () {
+      final response = InstallResponse.fromJson({
+        'installId': 'inst_456',
+        'attributed': true,
+        'confidenceScore': 70,
+        'matchedFactors': <String>[],
+        'competingLinks': 3.0,
+      });
+
+      expect(response.competingLinks, 3);
+      expect(response.competingLinks, isA<int>());
+    });
+
+    test('reads unexpected certainty values as null instead of failing', () {
+      final response = InstallResponse.fromJson({
+        'installId': 'inst_456',
+        'attributed': true,
+        'confidenceScore': 70,
+        'matchedFactors': <String>[],
+        'attributionMethod': 7,
+        'competingLinks': 'two',
+      });
+
+      expect(response.attributionMethod, isNull);
+      expect(response.competingLinks, isNull);
+    });
+
+    test('round-trips the certainty fields through JSON', () {
+      const response = InstallResponse(
+        installId: 'inst_1',
+        attributed: true,
+        confidenceScore: 90,
+        matchedFactors: ['ip'],
+        attributionMethod: 'fingerprint',
+        competingLinks: 1,
+      );
+
+      expect(InstallResponse.fromJson(response.toJson()), equals(response));
+    });
+
     test('throws when a required field is missing', () {
       expect(
         () => InstallResponse.fromJson({
@@ -129,6 +222,16 @@ void main() {
 
       expect(res1, equals(res2));
       expect(res1, isNot(equals(res3)));
+      expect(
+        res1,
+        isNot(equals(InstallResponse(
+          installId: '1',
+          attributed: true,
+          confidenceScore: 10,
+          matchedFactors: ['a'],
+          competingLinks: 1,
+        ))),
+      );
     });
   });
 }

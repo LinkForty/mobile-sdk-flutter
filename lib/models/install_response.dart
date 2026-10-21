@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../link_forty_logger.dart';
 import 'deep_link_data.dart';
+import 'match_certainty_json.dart';
 
 part 'install_response.g.dart';
 
@@ -27,6 +28,26 @@ class InstallResponse {
   @JsonKey(fromJson: _deepLinkDataFromJson)
   final DeepLinkData? deepLinkData;
 
+  /// How the install was matched: `"fingerprint"` when it was matched to a
+  /// link click, `"none"` for an organic install.
+  ///
+  /// `null` when the server did not report it, and on launches after the one
+  /// that reported the install.
+  @JsonKey(fromJson: stringFromJsonOrNull)
+  final String? attributionMethod;
+
+  /// How many other links had a click from this install's network that also
+  /// reached the confidence threshold. `0` means no other link was in
+  /// contention (and is also the value for an organic install); above `0`,
+  /// another device's tap may be what led to this install, so an app acting on
+  /// a sensitive link (sign-in, a gift) can treat the match as unverified, for
+  /// example by asking the user to confirm.
+  ///
+  /// `null` when the server did not report it, and on launches after the one
+  /// that reported the install.
+  @JsonKey(fromJson: intFromJsonOrNull)
+  final int? competingLinks;
+
   /// Creates an install response
   const InstallResponse({
     required this.installId,
@@ -34,6 +55,8 @@ class InstallResponse {
     required this.confidenceScore,
     required this.matchedFactors,
     this.deepLinkData,
+    this.attributionMethod,
+    this.competingLinks,
   });
 
   /// JSON deserialization
@@ -49,7 +72,9 @@ class InstallResponse {
     installId: $installId,
     attributed: $attributed,
     confidenceScore: $confidenceScore,
-    matchedFactors: $matchedFactors
+    matchedFactors: $matchedFactors,
+    attributionMethod: ${attributionMethod ?? 'null'},
+    competingLinks: ${competingLinks ?? 'null'}
 )''';
   }
 
@@ -62,7 +87,9 @@ class InstallResponse {
           attributed == other.attributed &&
           confidenceScore == other.confidenceScore &&
           _listEquals(matchedFactors, other.matchedFactors) &&
-          deepLinkData == other.deepLinkData;
+          deepLinkData == other.deepLinkData &&
+          attributionMethod == other.attributionMethod &&
+          competingLinks == other.competingLinks;
 
   @override
   int get hashCode =>
@@ -70,7 +97,9 @@ class InstallResponse {
       attributed.hashCode ^
       confidenceScore.hashCode ^
       _listHashCode(matchedFactors) ^
-      deepLinkData.hashCode;
+      deepLinkData.hashCode ^
+      attributionMethod.hashCode ^
+      competingLinks.hashCode;
 
   /// Helper for list equality comparison
   static bool _listEquals(List<String> a, List<String> b) {
