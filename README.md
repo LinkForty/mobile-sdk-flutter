@@ -33,7 +33,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.3.2
+  linkforty_flutter: ^0.4.0
 ```
 
 Or run:
@@ -76,7 +76,7 @@ void main() async {
 
 ### 2. Handle Deferred Deep Links (Install Attribution)
 
-Register a callback after `initialize()` returns. It receives the link the app was installed from, or `null` for an organic install. It is called on every launch with the attribution recorded at install, so if it drives navigation, record that you have handled it (in your own storage) and act on it once.
+Register a callback after `initialize()` returns. It receives the link the app was installed from, or `null` for an organic install. It is called once, on the launch that reports the install; later launches don't call it, and the attribution stays available from `getInstallData()`.
 
 ```dart
 // checking attribution status
