@@ -382,19 +382,41 @@ void main() {
       expect(saved.single, contains('"direct"'));
     });
 
-    test('a cached install does not replace last-click attribution', () async {
+    test('a later launch delivers no deferred deep link', () async {
       when(mockStorageManager.getInstallId()).thenReturn('inst_1');
       when(mockStorageManager.getInstallData()).thenReturn(
         const DeepLinkData(shortCode: 'xyz', linkId: 'install'),
       );
       await initialize();
 
-      DeepLinkData? delivered;
-      LinkForty.instance.onDeferredDeepLink((data) => delivered = data);
+      final delivered = <DeepLinkData?>[];
+      LinkForty.instance.onDeferredDeepLink(delivered.add);
       await pumpEventQueue();
 
-      expect(delivered?.linkId, 'install');
+      expect(delivered, isEmpty);
+      expect(LinkForty.instance.getInstallData()?.linkId, 'install');
       verifyNever(mockStorageManager.saveAttribution(any));
+    });
+
+    test(
+        'the launch that reports the install delivers the deferred deep link once',
+        () async {
+      stubInstall(
+        const InstallResponse(
+          installId: 'inst_1',
+          attributed: true,
+          confidenceScore: 90,
+          matchedFactors: [],
+          deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
+        ),
+      );
+      await initialize();
+
+      final delivered = <DeepLinkData?>[];
+      LinkForty.instance.onDeferredDeepLink(delivered.add);
+      await pumpEventQueue();
+
+      expect(delivered.map((d) => d?.linkId), ['install']);
     });
   });
 }

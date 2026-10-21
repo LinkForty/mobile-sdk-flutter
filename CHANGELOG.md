@@ -1,3 +1,7 @@
+## 0.4.0
+
+* **Behavior change:** `onDeferredDeepLink` is called once, on the launch that reports the install, with the link the app was installed from or `null` for an organic install. It was called on every launch with the attribution recorded at install, so an app had to record that it had handled the link itself. Later launches don't call it; the attribution stays available from `getInstallData()`. If your app kept its own "already handled" flag for the deferred deep link, it can be removed. This matches the iOS, Android, React Native and Expo SDKs.
+
 ## 0.3.2
 
 * **Fixed:** `trackEvent`, `trackRevenue` and `trackScreenView` succeed when the server stores the event. The event endpoint replies `{"eventId", "acknowledged"}`, and the SDK expected a `success` field it has never sent, so every call threw a `DecodingError` after the event was stored, queued it, and sent it again on each flush and on later launches, from the persisted queue. Events queued on a device by earlier versions are sent once more and then leave the queue.

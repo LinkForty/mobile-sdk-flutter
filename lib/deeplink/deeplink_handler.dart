@@ -105,18 +105,22 @@ class DeepLinkHandler {
   ///
   /// - [deepLinkData]: Deep link data from attribution, null for organic
   /// - [isNewInstall]: Whether the install was reported on this launch, rather
-  ///   than loaded from the cache. Only then is it an open for last-click
-  ///   attribution.
+  ///   than loaded from the cache. Only that launch delivers the deferred deep
+  ///   link and records it as an open for last-click attribution; a later
+  ///   launch delivers nothing, and the attribution stays available from
+  ///   `LinkForty.getInstallData()`.
   Future<void> deliverDeferredDeepLink(
     DeepLinkData? deepLinkData, {
     bool isNewInstall = true,
   }) async {
+    if (!isNewInstall) return;
+
     _cachedDeferredDeepLink = deepLinkData;
     _deferredDeepLinkDelivered = true;
 
     // Pin last-click attribution to this deferred (install) open, unless a
     // direct open has already been recorded: that is the newer of the two.
-    if (isNewInstall && !_directOpenRecorded) {
+    if (!_directOpenRecorded) {
       await _attributionContext?.recordDeepLinkOpen(
         linkId: deepLinkData?.linkId,
       );

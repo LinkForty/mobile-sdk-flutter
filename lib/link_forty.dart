@@ -224,8 +224,10 @@ class LinkForty {
   ///
   /// Deferred links are those clicked before the app was installed. The
   /// callback receives the link's data, or `null` for an organic install. It
-  /// is called on every launch, with the attribution recorded at install, and
-  /// a callback registered after [initialize] returns is called immediately.
+  /// is called once, on the launch that reports the install; a callback
+  /// registered after [initialize] returns on that launch is called
+  /// immediately. Later launches don't call it; the attribution stays
+  /// available from [getInstallData].
   void onDeferredDeepLink(DeferredDeepLinkCallback callback) {
     if (!_isInitialized) {
       LinkFortyLogger.log('SDK not initialized. Call initialize() first.');
