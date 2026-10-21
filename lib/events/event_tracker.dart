@@ -92,10 +92,12 @@ class EventTracker implements EventTrackerProtocol {
       // If send succeeds, try to flush queue
       await flushQueue();
     } catch (e) {
-      // If send fails, queue the event and persist
-      _eventQueue.enqueue(event);
-      await _persistQueue();
-      LinkFortyLogger.log('Event queued due to error: $e');
+      // Queue it if a later attempt could succeed; a rejected event is not retried.
+      if (isRetryable(e)) {
+        _eventQueue.enqueue(event);
+        await _persistQueue();
+        LinkFortyLogger.log('Event queued due to error: $e');
+      }
       rethrow;
     }
   }
@@ -158,7 +160,9 @@ class EventTracker implements EventTrackerProtocol {
 
   // MARK: - Queue Management
 
-  /// Flushes the event queue, attempting to send all queued events
+  /// Sends queued events in order. Stops at the first event that fails with an
+  /// error worth retrying and keeps it at the head of the queue; drops an event
+  /// the server rejects.
   @override
   Future<void> flushQueue() async {
     LinkFortyLogger.log('Flushing event queue (${_eventQueue.count} events)');
@@ -172,13 +176,28 @@ class EventTracker implements EventTrackerProtocol {
         await _persistQueue();
         LinkFortyLogger.log('Queued event sent: ${event.eventName}');
       } catch (e) {
-        // Re-queue if send fails
-        _eventQueue.enqueue(event);
+        if (isRetryable(e)) {
+          _eventQueue.requeueFront([event]);
+          await _persistQueue();
+          LinkFortyLogger.log(
+              'Failed to send queued event, keeping it queued: $e');
+          return;
+        }
         await _persistQueue();
-        LinkFortyLogger.log('Failed to send queued event: $e');
-        return;
+        LinkFortyLogger.log('Dropping queued event the server rejected: $e');
       }
     }
+  }
+
+  /// Network failures and server errors (5xx) can succeed later; anything else
+  /// (a 4xx, an event that can't be encoded) will fail the same way again.
+  static bool isRetryable(Object error) {
+    if (error is NetworkError) return true;
+    if (error is InvalidResponseError) {
+      final status = error.statusCode;
+      return status == null || status >= 500;
+    }
+    return false;
   }
 
   /// Returns the number of queued events

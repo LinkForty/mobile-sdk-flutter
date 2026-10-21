@@ -44,6 +44,19 @@ class EventQueue {
     return _queue.removeFirst();
   }
 
+  /// Puts [events] back at the front of the queue, oldest first, ahead of
+  /// anything queued since. Events beyond capacity are dropped from the end.
+  void requeueFront(List<EventRequest> events) {
+    for (final event in events.reversed) {
+      _queue.addFirst(event);
+    }
+    while (_queue.length > _maxQueueSize) {
+      final dropped = _queue.removeLast();
+      LinkFortyLogger.log(
+          'Event queue full, dropping event: ${dropped.eventName}');
+    }
+  }
+
   /// Returns a snapshot of all events currently in the queue without removing them.
   List<EventRequest> peek() {
     return List<EventRequest>.from(_queue);
