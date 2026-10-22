@@ -267,4 +267,95 @@ void main() {
       },
     );
   });
+
+  group('install referrer', () {
+    final fingerprint = DeviceFingerprint(
+      userAgent: 'ua',
+      timezone: 'tz',
+      language: 'en',
+      screenWidth: 100,
+      screenHeight: 100,
+      platform: 'Android',
+      platformVersion: '15',
+      appVersion: '1.0',
+      attributionWindowHours: 168,
+    );
+
+    setUp(() {
+      when(
+        mockFingerprintCollector.collectFingerprint(
+          attributionWindowHours: anyNamed('attributionWindowHours'),
+          deviceId: anyNamed('deviceId'),
+        ),
+      ).thenAnswer((_) async => fingerprint);
+      when(
+        mockNetworkManager.request<InstallResponse>(
+          endpoint: anyNamed('endpoint'),
+          method: anyNamed('method'),
+          body: anyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).thenAnswer(
+        (_) async => InstallResponse(
+          installId: 'inst_1',
+          attributed: false,
+          confidenceScore: 0,
+          matchedFactors: const [],
+        ),
+      );
+    });
+
+    Map<String, dynamic> sentBody() {
+      return verify(
+        mockNetworkManager.request<InstallResponse>(
+          endpoint: '/api/sdk/v1/install',
+          method: HttpMethod.post,
+          body: captureAnyNamed('body'),
+          fromJson: anyNamed('fromJson'),
+        ),
+      ).captured.single as Map<String, dynamic>;
+    }
+
+    test('is sent with the fingerprint', () async {
+      final manager = AttributionManager(
+        networkManager: mockNetworkManager,
+        storageManager: mockStorageManager,
+        fingerprintCollector: mockFingerprintCollector,
+        readInstallReferrer: () async => 'lf_click=abc',
+      );
+      await manager.reportInstall(attributionWindowHours: 168, appToken: 'tok');
+      expect(sentBody(), {
+        ...fingerprint.toJson(),
+        'appToken': 'tok',
+        'installReferrer': 'lf_click=abc',
+      });
+    });
+
+    test('is left out when there is none', () async {
+      final manager = AttributionManager(
+        networkManager: mockNetworkManager,
+        storageManager: mockStorageManager,
+        fingerprintCollector: mockFingerprintCollector,
+        readInstallReferrer: () async => null,
+      );
+      await manager.reportInstall(attributionWindowHours: 168);
+      expect(sentBody().containsKey('installReferrer'), isFalse);
+    });
+
+    test('is not read once the install is reported', () async {
+      when(mockStorageManager.getInstallId()).thenReturn('existing');
+      var reads = 0;
+      final manager = AttributionManager(
+        networkManager: mockNetworkManager,
+        storageManager: mockStorageManager,
+        fingerprintCollector: mockFingerprintCollector,
+        readInstallReferrer: () async {
+          reads++;
+          return 'lf_click=abc';
+        },
+      );
+      await manager.reportInstall(attributionWindowHours: 168);
+      expect(reads, 0);
+    });
+  });
 }

@@ -1,3 +1,8 @@
+## 0.6.0
+
+* **Google Play install referrer.** On Android, the launch that reports the install reads the Play install referrer and sends it as `installReferrer`. A LinkForty link puts its click id in the referrer of the Play listing it sends a visitor to, so a server on `@linkforty/core` 1.41.1 or later matches the install to that exact click: `attributionMethod` is `"install_referrer"`, `confidenceScore` 100, `matchedFactors` `["install_referrer"]` and `competingLinks` 0. The SDK waits at most 2 seconds for Play and asks once more after a failed read; without a referrer (iOS, another store, a sideload, no answer) the install is matched by fingerprint as before.
+* Adds the `android_play_install_referrer` plugin (Android only), which brings `com.android.installreferrer` 2.2 and its `BIND_GET_INSTALL_REFERRER_SERVICE` permission. It is a normal permission: Android grants it without asking the user.
+
 ## 0.5.0
 
 * **Install-match certainty.** The deferred deep link passed to `onDeferredDeepLink` now carries `confidenceScore`, `matchedFactors`, `attributionMethod` (`"fingerprint"`) and `competingLinks`. `competingLinks` counts the other links that had a click from the install's network that also reached the confidence threshold: `0` means no other link was in contention, and above `0` another device's tap may be what led to the install, so an app acting on a sensitive link (a sign-in, a gift) can ask the user to confirm. All four are `null` on a direct deep link.
