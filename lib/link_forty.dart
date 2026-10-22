@@ -17,6 +17,7 @@ import 'network/http_method.dart';
 import 'storage/storage_manager.dart';
 import 'fingerprint/fingerprint_collector.dart';
 import 'attribution/attribution_manager.dart';
+import 'attribution/install_referrer.dart';
 import 'attribution/attribution_context.dart';
 import 'events/event_tracker.dart';
 import 'deeplink/deeplink_handler.dart';
@@ -108,6 +109,7 @@ class LinkForty {
     @visibleForTesting StorageManagerProtocol? storageManager,
     @visibleForTesting FingerprintCollectorProtocol? fingerprintCollector,
     @visibleForTesting Stream<Uri>? incomingLinks,
+    @visibleForTesting InstallReferrerReader? installReferrerReader,
   }) async {
     if (_instance != null) {
       throw const AlreadyInitializedError();
@@ -139,6 +141,8 @@ class LinkForty {
       networkManager: effectiveNetworkManager,
       storageManager: effectiveStorageManager,
       fingerprintCollector: effectiveFingerprintCollector,
+      readInstallReferrer:
+          installReferrerReader ?? () => PlayInstallReferrer.read(),
     );
 
     sdk._eventTracker = EventTracker(

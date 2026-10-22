@@ -10,6 +10,7 @@ import '../network/http_method.dart';
 import '../storage/storage_manager.dart';
 import '../fingerprint/fingerprint_collector.dart';
 import '../errors/link_forty_error.dart';
+import 'install_referrer.dart';
 
 /// Manages app install attribution and initial deferred deep link retrieval.
 ///
@@ -19,19 +20,24 @@ class AttributionManager {
   final NetworkManagerProtocol _networkManager;
   final StorageManagerProtocol _storageManager;
   final FingerprintCollectorProtocol _fingerprintCollector;
+  final InstallReferrerReader? _readInstallReferrer;
 
   /// Creates an attribution manager
   ///
   /// - [networkManager]: Network manager for API requests
   /// - [storageManager]: Storage manager for caching data
   /// - [fingerprintCollector]: Fingerprint collector for device data
+  /// - [readInstallReferrer]: Reads the Google Play install referrer; null
+  ///   sends none
   AttributionManager({
     required NetworkManagerProtocol networkManager,
     required StorageManagerProtocol storageManager,
     required FingerprintCollectorProtocol fingerprintCollector,
+    InstallReferrerReader? readInstallReferrer,
   })  : _networkManager = networkManager,
         _storageManager = storageManager,
-        _fingerprintCollector = fingerprintCollector;
+        _fingerprintCollector = fingerprintCollector,
+        _readInstallReferrer = readInstallReferrer;
 
   // MARK: - Install Attribution
 
@@ -74,18 +80,26 @@ class AttributionManager {
       );
     }
 
+    final referrerRead = _readInstallReferrer?.call();
     final fingerprint = await _fingerprintCollector.collectFingerprint(
       attributionWindowHours: attributionWindowHours,
       deviceId: deviceId,
     );
+    // On Android, the Play install referrer names the click exactly; without
+    // one the install is matched by fingerprint.
+    final installReferrer = await referrerRead;
 
     // Attach the workspace token (when provided) so Cloud can scope attribution
     // to the correct workspace rather than relying solely on fingerprint matching.
-    final body = appToken != null
-        ? {...fingerprint.toJson(), 'appToken': appToken}
-        : fingerprint.toJson();
+    final body = <String, dynamic>{
+      ...fingerprint.toJson(),
+      if (appToken != null) 'appToken': appToken,
+      if (installReferrer != null) 'installReferrer': installReferrer,
+    };
 
-    LinkFortyLogger.log('Reporting install with fingerprint: $fingerprint');
+    LinkFortyLogger.log(
+      'Reporting install with fingerprint: $fingerprint, install referrer: $installReferrer',
+    );
 
     InstallResponse response;
     try {

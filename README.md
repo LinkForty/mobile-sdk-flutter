@@ -9,7 +9,7 @@
 
 ## Features
 
-- **Deferred Deep Linking**: Match app installs to link clicks using privacy-compliant fingerprinting
+- **Deferred Deep Linking**: Match app installs to link clicks: exactly, from the Google Play install referrer on Android, and otherwise by privacy-compliant fingerprinting
 - **Universal Links & App Links**: Full support for iOS Universal Links and Android App Links (HTTPS deep links)
 - **Custom URL Schemes**: Handle custom app URL schemes
 - **Event Tracking**: Track in-app events and conversions
@@ -33,7 +33,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.5.0
+  linkforty_flutter: ^0.6.0
 ```
 
 Or run:
@@ -100,13 +100,13 @@ LinkForty.instance.onDeferredDeepLink((deepLinkData) {
 
 #### How certain is the match?
 
-A deferred deep link is matched to a click by device fingerprint, so `DeepLinkData` also carries the match details:
+On Android, the SDK reads the Google Play install referrer on the launch that reports the install (waiting at most 2 seconds) and sends it with the install. A LinkForty link puts its click id in the referrer of the Play listing it sends a visitor to, so a server on `@linkforty/core` 1.41.1 or later matches the install to that exact click: `attributionMethod` is `"install_referrer"`, `confidenceScore` 100 and `competingLinks` 0. Otherwise (iOS, another store, a sideload, no answer from Play) the deferred deep link is matched to a click by device fingerprint. Either way, `DeepLinkData` carries the match details:
 
 | Field | Type | Meaning |
 |-------|------|---------|
 | `confidenceScore` | `double?` | Confidence of the match, 0-100. |
-| `matchedFactors` | `List<String>?` | Which fingerprint factors matched the click. |
-| `attributionMethod` | `String?` | How the install was matched (`"fingerprint"`). |
+| `matchedFactors` | `List<String>?` | Which factors matched the click (`["install_referrer"]` for a referrer match). |
+| `attributionMethod` | `String?` | How the install was matched (`"install_referrer"` or `"fingerprint"`). |
 | `competingLinks` | `int?` | How many other links had a click from the install's network that also reached the confidence threshold. |
 
 `competingLinks` is `0` when no other link was in contention. Above `0`, another device's tap may be what led to this install, so an app acting on a sensitive link (a sign-in, a gift) can treat the match as unverified, for example by asking the user to confirm:
@@ -124,7 +124,7 @@ LinkForty.instance.onDeferredDeepLink((deepLinkData) {
 });
 ```
 
-These fields are `null` on a direct deep link (`onDeepLink`), which is not a fingerprint match. The `InstallResponse` returned by `initialize()` carries `attributionMethod` (`"fingerprint"`, or `"none"` for an organic install) and `competingLinks` as well, on the launch that reports the install; on later launches both are `null`.
+These fields are `null` on a direct deep link (`onDeepLink`), which is not an install match. The `InstallResponse` returned by `initialize()` carries `attributionMethod` (`"install_referrer"`, `"fingerprint"`, or `"none"` for an organic install) and `competingLinks` as well, on the launch that reports the install; on later launches both are `null`.
 
 ### 3. Handle Direct Deep Links (Universal Links / App Links)
 
