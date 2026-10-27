@@ -24,7 +24,8 @@ android {
         applicationId = "linkforty.com.example"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // API 24 is the minimum the LinkForty SDK's dependencies (app_links) support.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

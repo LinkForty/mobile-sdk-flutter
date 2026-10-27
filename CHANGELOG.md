@@ -1,3 +1,7 @@
+## Unreleased
+
+* **Corrected minimums.** `pubspec.yaml` now states the Flutter and Dart versions the SDK actually needs: Flutter 3.38.1+ and Dart 3.10+ (it said Flutter 3.10 and Dart 3.0). The oldest versions of `app_links`, `device_info_plus` and `package_info_plus` the SDK accepts already required them, so an older toolchain could not resolve the package; nothing changes for an app that builds today. Apps need iOS 13+ and Android API 24+ (`minSdk 24`), which every accepted `app_links` version requires. The example app sets `platform :ios, '13.0'` and `minSdk = 24` explicitly.
+
 ## 0.6.0
 
 * **Google Play install referrer.** On Android, the launch that reports the install reads the Play install referrer and sends it as `installReferrer`. A LinkForty link puts its click id in the referrer of the Play listing it sends a visitor to, so a server on `@linkforty/core` 1.41.1 or later matches the install to that exact click: `attributionMethod` is `"install_referrer"`, `confidenceScore` 100, `matchedFactors` `["install_referrer"]` and `competingLinks` 0. The SDK waits at most 2 seconds for Play and asks once more after a failed read; without a referrer (iOS, another store, a sideload, no answer) the install is matched by fingerprint as before.
