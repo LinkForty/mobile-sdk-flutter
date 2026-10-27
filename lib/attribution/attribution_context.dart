@@ -24,10 +24,10 @@ class ActiveAttribution {
   });
 
   Map<String, dynamic> toJson() => {
-        'linkId': linkId,
-        if (clickId != null) 'clickId': clickId,
-        'openedAt': openedAt,
-      };
+    'linkId': linkId,
+    if (clickId != null) 'clickId': clickId,
+    'openedAt': openedAt,
+  };
 
   factory ActiveAttribution.fromJson(Map<String, dynamic> json) =>
       ActiveAttribution(
@@ -80,9 +80,9 @@ class AttributionContext {
   AttributionContext({
     required StorageManagerProtocol storage,
     bool debug = false,
-  })  : _storage = storage,
-        _debug = debug,
-        _sessionId = _generateSessionId() {
+  }) : _storage = storage,
+       _debug = debug,
+       _sessionId = _generateSessionId() {
     _active = _loadActive();
   }
 
@@ -116,11 +116,11 @@ class AttributionContext {
 
   /// The attribution fields to merge into every event payload.
   AttributionStamp getStamp() => AttributionStamp(
-        attributedLinkId: _active?.linkId,
-        attributedClickId: _active?.clickId,
-        linkOpenedAt: _active?.openedAt,
-        sessionId: _sessionId,
-      );
+    attributedLinkId: _active?.linkId,
+    attributedClickId: _active?.clickId,
+    linkOpenedAt: _active?.openedAt,
+    sessionId: _sessionId,
+  );
 
   /// The current session id (one app-open journey).
   String get sessionId => _sessionId;

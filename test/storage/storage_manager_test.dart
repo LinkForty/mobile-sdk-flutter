@@ -54,27 +54,30 @@ void main() {
       expect(result?.shortCode, 'abc');
     });
 
-    test('getInstallData restores the match certainty fields it saved',
-        () async {
-      String? saved;
-      when(mockPrefs.setString(StorageKeys.installData, any))
-          .thenAnswer((invocation) async {
-        saved = invocation.positionalArguments[1] as String;
-        return true;
-      });
-      const data = DeepLinkData(
-        shortCode: 'abc',
-        confidenceScore: 88,
-        matchedFactors: ['ip', 'ua'],
-        attributionMethod: 'fingerprint',
-        competingLinks: 1,
-      );
+    test(
+      'getInstallData restores the match certainty fields it saved',
+      () async {
+        String? saved;
+        when(mockPrefs.setString(StorageKeys.installData, any)).thenAnswer((
+          invocation,
+        ) async {
+          saved = invocation.positionalArguments[1] as String;
+          return true;
+        });
+        const data = DeepLinkData(
+          shortCode: 'abc',
+          confidenceScore: 88,
+          matchedFactors: ['ip', 'ua'],
+          attributionMethod: 'fingerprint',
+          competingLinks: 1,
+        );
 
-      await storageManager.saveInstallData(data);
-      when(mockPrefs.getString(StorageKeys.installData)).thenReturn(saved);
+        await storageManager.saveInstallData(data);
+        when(mockPrefs.getString(StorageKeys.installData)).thenReturn(saved);
 
-      expect(storageManager.getInstallData(), equals(data));
-    });
+        expect(storageManager.getInstallData(), equals(data));
+      },
+    );
 
     test('getInstallData decodes data saved without the certainty fields', () {
       when(mockPrefs.getString(StorageKeys.installData)).thenReturn(

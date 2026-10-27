@@ -53,7 +53,8 @@ class EventQueue {
     while (_queue.length > _maxQueueSize) {
       final dropped = _queue.removeLast();
       LinkFortyLogger.log(
-          'Event queue full, dropping event: ${dropped.eventName}');
+        'Event queue full, dropping event: ${dropped.eventName}',
+      );
     }
   }
 

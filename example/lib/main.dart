@@ -7,16 +7,13 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LinkForty Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       // Auto-reports a `screen_view` (stamped with last-click attribution) for
       // every named route. Give your routes names to have them tracked.
       navigatorObservers: [LinkFortyNavigatorObserver()],
@@ -26,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class LinkFortyDemo extends StatefulWidget {
-  const LinkFortyDemo({Key? key}) : super(key: key);
+  const LinkFortyDemo({super.key});
 
   @override
   State<LinkFortyDemo> createState() => _LinkFortyDemoState();
@@ -108,13 +105,10 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
 
   Future<void> _trackEvent(String name) async {
     try {
-      await LinkForty.instance.trackEvent(
-        name,
-        {
-          'timestamp': DateTime.now().millisecondsSinceEpoch / 1000,
-          'source': 'example_app',
-        },
-      );
+      await LinkForty.instance.trackEvent(name, {
+        'timestamp': DateTime.now().millisecondsSinceEpoch / 1000,
+        'source': 'example_app',
+      });
 
       if (!mounted) return;
       setState(() {
@@ -157,10 +151,7 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
       await LinkForty.instance.trackRevenue(
         amount: amount,
         currency: currency,
-        properties: {
-          'product': 'example_product',
-          'quantity': 1,
-        },
+        properties: {'product': 'example_product', 'quantity': 1},
       );
 
       if (!mounted) return;
@@ -232,9 +223,7 @@ class _LinkFortyDemoState extends State<LinkFortyDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('LinkForty Example'),
-      ),
+      appBar: AppBar(title: const Text('LinkForty Example')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -297,11 +286,7 @@ class _SectionContainer extends StatelessWidget {
   final String title;
   final Widget child;
 
-  const _SectionContainer({
-    Key? key,
-    required this.title,
-    required this.child,
-  }) : super(key: key);
+  const _SectionContainer({required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -315,9 +300,10 @@ class _SectionContainer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           child,
         ],
@@ -332,11 +318,10 @@ class _StatusSection extends StatelessWidget {
   final int queuedEvents;
 
   const _StatusSection({
-    Key? key,
     required this.isInitialized,
     required this.eventCount,
     required this.queuedEvents,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -353,13 +338,17 @@ class _StatusSection extends StatelessWidget {
           ),
           _RowItem(
             label: 'Events Tracked:',
-            value: Text('$eventCount',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            value: Text(
+              '$eventCount',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           _RowItem(
             label: 'Queued Events:',
-            value: Text('$queuedEvents',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            value: Text(
+              '$queuedEvents',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -371,11 +360,7 @@ class _AttributionSection extends StatelessWidget {
   final String? installId;
   final bool isAttributed;
 
-  const _AttributionSection({
-    Key? key,
-    this.installId,
-    required this.isAttributed,
-  }) : super(key: key);
+  const _AttributionSection({this.installId, required this.isAttributed});
 
   @override
   Widget build(BuildContext context) {
@@ -414,12 +399,11 @@ class _EventsSection extends StatelessWidget {
   final VoidCallback onFlushEvents;
 
   const _EventsSection({
-    Key? key,
     required this.onTrackEvent,
     required this.onTrackScreenView,
     required this.onTrackRevenue,
     required this.onFlushEvents,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -473,11 +457,10 @@ class _LinkCreationSection extends StatelessWidget {
   final String? createdLinkShortCode;
 
   const _LinkCreationSection({
-    Key? key,
     required this.onCreateLink,
     this.createdLinkURL,
     this.createdLinkShortCode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -495,8 +478,10 @@ class _LinkCreationSection extends StatelessWidget {
             const SizedBox(height: 10),
             Text('URL: $createdLinkURL', style: const TextStyle(fontSize: 12)),
             if (createdLinkShortCode != null)
-              Text('Short Code: $createdLinkShortCode',
-                  style: const TextStyle(fontSize: 12)),
+              Text(
+                'Short Code: $createdLinkShortCode',
+                style: const TextStyle(fontSize: 12),
+              ),
           ],
         ],
       ),
@@ -507,18 +492,17 @@ class _LinkCreationSection extends StatelessWidget {
 class _DeepLinkSection extends StatelessWidget {
   final DeepLinkData? deepLinkData;
 
-  const _DeepLinkSection({
-    Key? key,
-    this.deepLinkData,
-  }) : super(key: key);
+  const _DeepLinkSection({this.deepLinkData});
 
   @override
   Widget build(BuildContext context) {
     return _SectionContainer(
       title: 'Deep Link Data',
       child: deepLinkData == null
-          ? const Text('No deep link data',
-              style: TextStyle(color: Colors.grey, fontSize: 12))
+          ? const Text(
+              'No deep link data',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -527,31 +511,38 @@ class _DeepLinkSection extends StatelessWidget {
                   _TextItem(label: 'iOS URL', value: deepLinkData!.iosURL),
                 if (deepLinkData!.deepLinkPath != null)
                   _TextItem(
-                      label: 'Deep Link Path',
-                      value: deepLinkData!.deepLinkPath),
+                    label: 'Deep Link Path',
+                    value: deepLinkData!.deepLinkPath,
+                  ),
                 if (deepLinkData!.appScheme != null)
                   _TextItem(
-                      label: 'App Scheme', value: deepLinkData!.appScheme),
+                    label: 'App Scheme',
+                    value: deepLinkData!.appScheme,
+                  ),
                 if (deepLinkData!.linkId != null)
                   _TextItem(
-                      label: 'Link ID',
-                      value: deepLinkData!.linkId,
-                      color: Colors.grey),
+                    label: 'Link ID',
+                    value: deepLinkData!.linkId,
+                    color: Colors.grey,
+                  ),
                 if (deepLinkData!.utmParameters != null) ...[
                   if (deepLinkData!.utmParameters!.source != null)
                     _TextItem(
-                        label: 'UTM Source',
-                        value: deepLinkData!.utmParameters!.source),
+                      label: 'UTM Source',
+                      value: deepLinkData!.utmParameters!.source,
+                    ),
                   if (deepLinkData!.utmParameters!.campaign != null)
                     _TextItem(
-                        label: 'UTM Campaign',
-                        value: deepLinkData!.utmParameters!.campaign),
+                      label: 'UTM Campaign',
+                      value: deepLinkData!.utmParameters!.campaign,
+                    ),
                 ],
                 if (deepLinkData!.customParameters != null &&
                     deepLinkData!.customParameters!.isNotEmpty)
                   _TextItem(
-                      label: 'Custom Params',
-                      value: '${deepLinkData!.customParameters!.length}'),
+                    label: 'Custom Params',
+                    value: '${deepLinkData!.customParameters!.length}',
+                  ),
               ],
             ),
     );
@@ -561,10 +552,7 @@ class _DeepLinkSection extends StatelessWidget {
 class _DataManagementSection extends StatelessWidget {
   final VoidCallback onClearData;
 
-  const _DataManagementSection({
-    Key? key,
-    required this.onClearData,
-  }) : super(key: key);
+  const _DataManagementSection({required this.onClearData});
 
   @override
   Widget build(BuildContext context) {
@@ -584,11 +572,7 @@ class _RowItem extends StatelessWidget {
   final String label;
   final Widget value;
 
-  const _RowItem({
-    Key? key,
-    required this.label,
-    required this.value,
-  }) : super(key: key);
+  const _RowItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -596,10 +580,7 @@ class _RowItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          value,
-        ],
+        children: [Text(label), value],
       ),
     );
   }
@@ -610,12 +591,7 @@ class _TextItem extends StatelessWidget {
   final String? value;
   final Color? color;
 
-  const _TextItem({
-    Key? key,
-    required this.label,
-    this.value,
-    this.color,
-  }) : super(key: key);
+  const _TextItem({required this.label, this.value, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -636,12 +612,11 @@ class _FullWidthButton extends StatelessWidget {
   final Color color;
 
   const _FullWidthButton({
-    Key? key,
     required this.onPressed,
     required this.icon,
     required this.label,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

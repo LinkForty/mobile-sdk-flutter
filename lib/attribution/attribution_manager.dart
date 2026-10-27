@@ -34,10 +34,10 @@ class AttributionManager {
     required StorageManagerProtocol storageManager,
     required FingerprintCollectorProtocol fingerprintCollector,
     InstallReferrerReader? readInstallReferrer,
-  })  : _networkManager = networkManager,
-        _storageManager = storageManager,
-        _fingerprintCollector = fingerprintCollector,
-        _readInstallReferrer = readInstallReferrer;
+  }) : _networkManager = networkManager,
+       _storageManager = storageManager,
+       _fingerprintCollector = fingerprintCollector,
+       _readInstallReferrer = readInstallReferrer;
 
   // MARK: - Install Attribution
 
@@ -93,8 +93,8 @@ class AttributionManager {
     // to the correct workspace rather than relying solely on fingerprint matching.
     final body = <String, dynamic>{
       ...fingerprint.toJson(),
-      if (appToken != null) 'appToken': appToken,
-      if (installReferrer != null) 'installReferrer': installReferrer,
+      'appToken': ?appToken,
+      'installReferrer': ?installReferrer,
     };
 
     LinkFortyLogger.log(

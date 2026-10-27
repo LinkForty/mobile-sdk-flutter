@@ -7,15 +7,12 @@ part of 'dashboard_create_link_response.dart';
 // **************************************************************************
 
 DashboardCreateLinkResponse _$DashboardCreateLinkResponseFromJson(
-        Map<String, dynamic> json) =>
-    DashboardCreateLinkResponse(
-      id: json['id'] as String,
-      shortCode: json['shortCode'] as String,
-    );
+  Map<String, dynamic> json,
+) => DashboardCreateLinkResponse(
+  id: json['id'] as String,
+  shortCode: json['shortCode'] as String,
+);
 
 Map<String, dynamic> _$DashboardCreateLinkResponseToJson(
-        DashboardCreateLinkResponse instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'shortCode': instance.shortCode,
-    };
+  DashboardCreateLinkResponse instance,
+) => <String, dynamic>{'id': instance.id, 'shortCode': instance.shortCode};

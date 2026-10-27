@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i2;
 
 import 'package:linkforty_flutter/fingerprint/device_fingerprint.dart' as _i3;
@@ -32,24 +33,14 @@ import 'package:mockito/src/dummies.dart' as _i6;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakeFuture_0<T1> extends _i1.SmartFake implements _i2.Future<T1> {
-  _FakeFuture_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeFuture_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 class _FakeDeviceFingerprint_1 extends _i1.SmartFake
     implements _i3.DeviceFingerprint {
-  _FakeDeviceFingerprint_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeDeviceFingerprint_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [NetworkManagerProtocol].
@@ -70,49 +61,39 @@ class MockNetworkManagerProtocol extends _i1.Mock
     required T Function(Map<String, dynamic>)? fromJson,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #request,
-          [],
-          {
-            #endpoint: endpoint,
-            #method: method,
-            #body: body,
-            #headers: headers,
-            #fromJson: fromJson,
-          },
-        ),
-        returnValue: _i6.ifNotNull(
-              _i6.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #request,
-                  [],
-                  {
+            Invocation.method(#request, [], {
+              #endpoint: endpoint,
+              #method: method,
+              #body: body,
+              #headers: headers,
+              #fromJson: fromJson,
+            }),
+            returnValue:
+                _i6.ifNotNull(
+                  _i6.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#request, [], {
+                      #endpoint: endpoint,
+                      #method: method,
+                      #body: body,
+                      #headers: headers,
+                      #fromJson: fromJson,
+                    }),
+                  ),
+                  (T v) => _i2.Future<T>.value(v),
+                ) ??
+                _FakeFuture_0<T>(
+                  this,
+                  Invocation.method(#request, [], {
                     #endpoint: endpoint,
                     #method: method,
                     #body: body,
                     #headers: headers,
                     #fromJson: fromJson,
-                  },
+                  }),
                 ),
-              ),
-              (T v) => _i2.Future<T>.value(v),
-            ) ??
-            _FakeFuture_0<T>(
-              this,
-              Invocation.method(
-                #request,
-                [],
-                {
-                  #endpoint: endpoint,
-                  #method: method,
-                  #body: body,
-                  #headers: headers,
-                  #fromJson: fromJson,
-                },
-              ),
-            ),
-      ) as _i2.Future<T>);
+          )
+          as _i2.Future<T>);
 }
 
 /// A class which mocks [StorageManagerProtocol].
@@ -125,87 +106,76 @@ class MockStorageManagerProtocol extends _i1.Mock
   }
 
   @override
-  _i2.Future<bool> saveInstallId(String? installId) => (super.noSuchMethod(
-        Invocation.method(
-          #saveInstallId,
-          [installId],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+  _i2.Future<bool> saveInstallId(String? installId) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveInstallId, [installId]),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
   _i2.Future<bool> saveInstallData(_i8.DeepLinkData? data) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #saveInstallData,
-          [data],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+            Invocation.method(#saveInstallData, [data]),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
-  bool isFirstLaunch() => (super.noSuchMethod(
-        Invocation.method(
-          #isFirstLaunch,
-          [],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool isFirstLaunch() =>
+      (super.noSuchMethod(
+            Invocation.method(#isFirstLaunch, []),
+            returnValue: false,
+          )
+          as bool);
 
   @override
-  _i2.Future<bool> setHasLaunched() => (super.noSuchMethod(
-        Invocation.method(
-          #setHasLaunched,
-          [],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+  _i2.Future<bool> setHasLaunched() =>
+      (super.noSuchMethod(
+            Invocation.method(#setHasLaunched, []),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
   _i2.Future<bool> saveEventQueue(List<_i9.EventRequest>? events) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #saveEventQueue,
-          [events],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+            Invocation.method(#saveEventQueue, [events]),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
-  List<_i9.EventRequest> loadEventQueue() => (super.noSuchMethod(
-        Invocation.method(
-          #loadEventQueue,
-          [],
-        ),
-        returnValue: <_i9.EventRequest>[],
-      ) as List<_i9.EventRequest>);
+  List<_i9.EventRequest> loadEventQueue() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadEventQueue, []),
+            returnValue: <_i9.EventRequest>[],
+          )
+          as List<_i9.EventRequest>);
 
   @override
-  _i2.Future<bool> saveAttribution(String? json) => (super.noSuchMethod(
-        Invocation.method(
-          #saveAttribution,
-          [json],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+  _i2.Future<bool> saveAttribution(String? json) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveAttribution, [json]),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
-  _i2.Future<bool> removeAttribution() => (super.noSuchMethod(
-        Invocation.method(
-          #removeAttribution,
-          [],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+  _i2.Future<bool> removeAttribution() =>
+      (super.noSuchMethod(
+            Invocation.method(#removeAttribution, []),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 
   @override
-  _i2.Future<bool> clearAll() => (super.noSuchMethod(
-        Invocation.method(
-          #clearAll,
-          [],
-        ),
-        returnValue: _i2.Future<bool>.value(false),
-      ) as _i2.Future<bool>);
+  _i2.Future<bool> clearAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearAll, []),
+            returnValue: _i2.Future<bool>.value(false),
+          )
+          as _i2.Future<bool>);
 }
 
 /// A class which mocks [FingerprintCollectorProtocol].
@@ -223,25 +193,19 @@ class MockFingerprintCollectorProtocol extends _i1.Mock
     String? deviceId,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #collectFingerprint,
-          [],
-          {
-            #attributionWindowHours: attributionWindowHours,
-            #deviceId: deviceId,
-          },
-        ),
-        returnValue:
-            _i2.Future<_i3.DeviceFingerprint>.value(_FakeDeviceFingerprint_1(
-          this,
-          Invocation.method(
-            #collectFingerprint,
-            [],
-            {
+            Invocation.method(#collectFingerprint, [], {
               #attributionWindowHours: attributionWindowHours,
               #deviceId: deviceId,
-            },
-          ),
-        )),
-      ) as _i2.Future<_i3.DeviceFingerprint>);
+            }),
+            returnValue: _i2.Future<_i3.DeviceFingerprint>.value(
+              _FakeDeviceFingerprint_1(
+                this,
+                Invocation.method(#collectFingerprint, [], {
+                  #attributionWindowHours: attributionWindowHours,
+                  #deviceId: deviceId,
+                }),
+              ),
+            ),
+          )
+          as _i2.Future<_i3.DeviceFingerprint>);
 }

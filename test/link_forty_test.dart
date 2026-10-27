@@ -229,8 +229,10 @@ void main() {
       ).thenAnswer((_) async => fingerprint);
       when(
         mockNetworkManager.request<DeepLinkData>(
-          endpoint:
-              argThat(startsWith('/api/sdk/v1/resolve/'), named: 'endpoint'),
+          endpoint: argThat(
+            startsWith('/api/sdk/v1/resolve/'),
+            named: 'endpoint',
+          ),
           method: anyNamed('method'),
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
@@ -238,8 +240,9 @@ void main() {
       ).thenAnswer(
         (_) async => const DeepLinkData(shortCode: 'abc', linkId: 'direct'),
       );
-      when(mockStorageManager.saveAttribution(any))
-          .thenAnswer((_) async => true);
+      when(
+        mockStorageManager.saveAttribution(any),
+      ).thenAnswer((_) async => true);
     });
 
     // close() never completes on a controller nothing listened to.
@@ -278,53 +281,54 @@ void main() {
       matchedFactors: [],
     );
 
+    test('delivers the launch link to an onDeepLink callback registered after '
+        'initialize', () async {
+      stubInstall(organic);
+      links.add(launchLink);
+      await initialize();
+
+      Uri? deliveredUri;
+      DeepLinkData? deliveredData;
+      LinkForty.instance.onDeepLink((uri, data) {
+        deliveredUri = uri;
+        deliveredData = data;
+      });
+      await pumpEventQueue();
+
+      expect(deliveredUri, launchLink);
+      expect(deliveredData?.linkId, 'direct');
+    });
+
     test(
-      'delivers the launch link to an onDeepLink callback registered after '
-      'initialize',
+      'delivers a link opened while running to registered callbacks',
+      () async {
+        stubInstall(organic);
+        await initialize();
+
+        final delivered = <Uri>[];
+        LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
+        links.add(launchLink);
+        await pumpEventQueue();
+
+        expect(delivered, [launchLink]);
+      },
+    );
+
+    test(
+      'a manual handleDeepLink of the same link is delivered once',
       () async {
         stubInstall(organic);
         links.add(launchLink);
         await initialize();
 
-        Uri? deliveredUri;
-        DeepLinkData? deliveredData;
-        LinkForty.instance.onDeepLink((uri, data) {
-          deliveredUri = uri;
-          deliveredData = data;
-        });
+        final delivered = <Uri>[];
+        LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
+        await LinkForty.instance.handleDeepLink(launchLink);
         await pumpEventQueue();
 
-        expect(deliveredUri, launchLink);
-        expect(deliveredData?.linkId, 'direct');
+        expect(delivered, [launchLink]);
       },
     );
-
-    test('delivers a link opened while running to registered callbacks',
-        () async {
-      stubInstall(organic);
-      await initialize();
-
-      final delivered = <Uri>[];
-      LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
-      links.add(launchLink);
-      await pumpEventQueue();
-
-      expect(delivered, [launchLink]);
-    });
-
-    test('a manual handleDeepLink of the same link is delivered once',
-        () async {
-      stubInstall(organic);
-      links.add(launchLink);
-      await initialize();
-
-      final delivered = <Uri>[];
-      LinkForty.instance.onDeepLink((uri, _) => delivered.add(uri));
-      await LinkForty.instance.handleDeepLink(launchLink);
-      await pumpEventQueue();
-
-      expect(delivered, [launchLink]);
-    });
 
     test('calls onDeferredDeepLink with null for an organic install', () async {
       stubInstall(organic);
@@ -342,51 +346,55 @@ void main() {
       expect(delivered, isNull);
     });
 
-    test('reports the install with the configured attribution window',
-        () async {
-      stubInstall(organic);
-      await initialize(
-        withConfig: LinkFortyConfig(
-          baseURL: Uri.parse('https://example.com'),
-          attributionWindowHours: 24,
-        ),
-      );
+    test(
+      'reports the install with the configured attribution window',
+      () async {
+        stubInstall(organic);
+        await initialize(
+          withConfig: LinkFortyConfig(
+            baseURL: Uri.parse('https://example.com'),
+            attributionWindowHours: 24,
+          ),
+        );
 
-      verify(
-        mockFingerprintCollector.collectFingerprint(
-          attributionWindowHours: 24,
-          deviceId: anyNamed('deviceId'),
-        ),
-      ).called(1);
-    });
+        verify(
+          mockFingerprintCollector.collectFingerprint(
+            attributionWindowHours: 24,
+            deviceId: anyNamed('deviceId'),
+          ),
+        ).called(1);
+      },
+    );
 
-    test('a direct open during the install launch outranks the install link',
-        () async {
-      stubInstall(
-        const InstallResponse(
-          installId: 'inst_1',
-          attributed: true,
-          confidenceScore: 90,
-          matchedFactors: [],
-          deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
-        ),
-        delay: const Duration(milliseconds: 20),
-      );
-      links.add(launchLink);
-      await initialize();
+    test(
+      'a direct open during the install launch outranks the install link',
+      () async {
+        stubInstall(
+          const InstallResponse(
+            installId: 'inst_1',
+            attributed: true,
+            confidenceScore: 90,
+            matchedFactors: [],
+            deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
+          ),
+          delay: const Duration(milliseconds: 20),
+        );
+        links.add(launchLink);
+        await initialize();
 
-      final saved = verify(mockStorageManager.saveAttribution(captureAny))
-          .captured
-          .cast<String>();
-      expect(saved, hasLength(1));
-      expect(saved.single, contains('"direct"'));
-    });
+        final saved = verify(
+          mockStorageManager.saveAttribution(captureAny),
+        ).captured.cast<String>();
+        expect(saved, hasLength(1));
+        expect(saved.single, contains('"direct"'));
+      },
+    );
 
     test('a later launch delivers no deferred deep link', () async {
       when(mockStorageManager.getInstallId()).thenReturn('inst_1');
-      when(mockStorageManager.getInstallData()).thenReturn(
-        const DeepLinkData(shortCode: 'xyz', linkId: 'install'),
-      );
+      when(
+        mockStorageManager.getInstallData(),
+      ).thenReturn(const DeepLinkData(shortCode: 'xyz', linkId: 'install'));
       await initialize();
 
       final delivered = <DeepLinkData?>[];
@@ -399,24 +407,25 @@ void main() {
     });
 
     test(
-        'the launch that reports the install delivers the deferred deep link once',
-        () async {
-      stubInstall(
-        const InstallResponse(
-          installId: 'inst_1',
-          attributed: true,
-          confidenceScore: 90,
-          matchedFactors: [],
-          deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
-        ),
-      );
-      await initialize();
+      'the launch that reports the install delivers the deferred deep link once',
+      () async {
+        stubInstall(
+          const InstallResponse(
+            installId: 'inst_1',
+            attributed: true,
+            confidenceScore: 90,
+            matchedFactors: [],
+            deepLinkData: DeepLinkData(shortCode: 'xyz', linkId: 'install'),
+          ),
+        );
+        await initialize();
 
-      final delivered = <DeepLinkData?>[];
-      LinkForty.instance.onDeferredDeepLink(delivered.add);
-      await pumpEventQueue();
+        final delivered = <DeepLinkData?>[];
+        LinkForty.instance.onDeferredDeepLink(delivered.add);
+        await pumpEventQueue();
 
-      expect(delivered.map((d) => d?.linkId), ['install']);
-    });
+        expect(delivered.map((d) => d?.linkId), ['install']);
+      },
+    );
   });
 }

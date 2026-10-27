@@ -72,17 +72,19 @@ void main() {
       expect(await FingerprintCollector.localTimezone(), 'Asia/Kolkata');
     });
 
-    test('falls back to the abbreviation when the platform cannot answer',
-        () async {
-      messenger.setMockMethodCallHandler(channel, (call) async {
-        throw PlatformException(code: 'unavailable');
-      });
+    test(
+      'falls back to the abbreviation when the platform cannot answer',
+      () async {
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          throw PlatformException(code: 'unavailable');
+        });
 
-      expect(
-        await FingerprintCollector.localTimezone(),
-        DateTime.now().timeZoneName,
-      );
-    });
+        expect(
+          await FingerprintCollector.localTimezone(),
+          DateTime.now().timeZoneName,
+        );
+      },
+    );
   });
 
   group('languageTag', () {
@@ -94,11 +96,20 @@ void main() {
       'fil-PH': const Locale('fil', 'PH'),
       // Script subtags are dropped.
       'zh-CN': const Locale.fromSubtags(
-          languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'),
+        languageCode: 'zh',
+        scriptCode: 'Hans',
+        countryCode: 'CN',
+      ),
       'zh-TW': const Locale.fromSubtags(
-          languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+        countryCode: 'TW',
+      ),
       'sr-RS': const Locale.fromSubtags(
-          languageCode: 'sr', scriptCode: 'Latn', countryCode: 'RS'),
+        languageCode: 'sr',
+        scriptCode: 'Latn',
+        countryCode: 'RS',
+      ),
       'zh': const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
     };
 
@@ -116,13 +127,19 @@ void main() {
     });
   });
 
-  testWidgets('reads the device locale from the platform dispatcher',
-      (tester) async {
+  testWidgets('reads the device locale from the platform dispatcher', (
+    tester,
+  ) async {
     tester.platformDispatcher.localeTestValue = const Locale.fromSubtags(
-        languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN');
+      languageCode: 'zh',
+      scriptCode: 'Hans',
+      countryCode: 'CN',
+    );
     addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
-    expect(FingerprintCollector.languageTag(tester.platformDispatcher.locale),
-        'zh-CN');
+    expect(
+      FingerprintCollector.languageTag(tester.platformDispatcher.locale),
+      'zh-CN',
+    );
   });
 }

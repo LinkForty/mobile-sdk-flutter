@@ -49,38 +49,42 @@ void main() {
       expect(deliveredData, data);
     });
 
-    test('holds a link that arrives before any callback, and delivers it once',
-        () async {
-      final uri = Uri.parse('https://example.com/abc');
-      await handler.handleDeepLink(uri);
+    test(
+      'holds a link that arrives before any callback, and delivers it once',
+      () async {
+        final uri = Uri.parse('https://example.com/abc');
+        await handler.handleDeepLink(uri);
 
-      final first = <Uri>[];
-      final second = <Uri>[];
-      final late = <Uri>[];
-      handler.onDeepLink((u, _) => first.add(u));
-      handler.onDeepLink((u, _) => second.add(u));
-      await Future.delayed(Duration.zero);
-      handler.onDeepLink((u, _) => late.add(u));
-      await Future.delayed(Duration.zero);
+        final first = <Uri>[];
+        final second = <Uri>[];
+        final late = <Uri>[];
+        handler.onDeepLink((u, _) => first.add(u));
+        handler.onDeepLink((u, _) => second.add(u));
+        await Future.delayed(Duration.zero);
+        handler.onDeepLink((u, _) => late.add(u));
+        await Future.delayed(Duration.zero);
 
-      expect(first, [uri]);
-      expect(second, [uri]);
-      expect(late, isEmpty);
-    });
+        expect(first, [uri]);
+        expect(second, [uri]);
+        expect(late, isEmpty);
+      },
+    );
 
-    test('ignores the same URL handled again within the duplicate window',
-        () async {
-      final uri = Uri.parse('https://example.com/abc');
-      final other = Uri.parse('https://example.com/def');
-      final delivered = <Uri>[];
-      handler.onDeepLink((u, _) => delivered.add(u));
+    test(
+      'ignores the same URL handled again within the duplicate window',
+      () async {
+        final uri = Uri.parse('https://example.com/abc');
+        final other = Uri.parse('https://example.com/def');
+        final delivered = <Uri>[];
+        handler.onDeepLink((u, _) => delivered.add(u));
 
-      await handler.handleDeepLink(uri);
-      await handler.handleDeepLink(uri);
-      await handler.handleDeepLink(other);
+        await handler.handleDeepLink(uri);
+        await handler.handleDeepLink(uri);
+        await handler.handleDeepLink(other);
 
-      expect(delivered, [uri, other]);
-    });
+        expect(delivered, [uri, other]);
+      },
+    );
 
     test('handleDeepLink parses local URL correctly', () async {
       final uri = Uri.parse('https://example.com/abc');

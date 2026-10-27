@@ -150,19 +150,27 @@ void main() {
         expect(a.hashCode, b.hashCode);
         expect(
           a,
-          isNot(equals(const DeepLinkData(
-            shortCode: 'abc',
-            matchedFactors: ['ip'],
-            competingLinks: 1,
-          ))),
+          isNot(
+            equals(
+              const DeepLinkData(
+                shortCode: 'abc',
+                matchedFactors: ['ip'],
+                competingLinks: 1,
+              ),
+            ),
+          ),
         );
         expect(
           a,
-          isNot(equals(const DeepLinkData(
-            shortCode: 'abc',
-            matchedFactors: ['ua'],
-            competingLinks: 0,
-          ))),
+          isNot(
+            equals(
+              const DeepLinkData(
+                shortCode: 'abc',
+                matchedFactors: ['ua'],
+                competingLinks: 0,
+              ),
+            ),
+          ),
         );
       });
 
@@ -186,8 +194,9 @@ void main() {
 
     group('mergingUrlParameters', () {
       test('adds URL parameters when the link configures none', () {
-        final merged = const DeepLinkData(shortCode: 'abc123')
-            .mergingUrlParameters({'slug': 'titanic'});
+        final merged = const DeepLinkData(
+          shortCode: 'abc123',
+        ).mergingUrlParameters({'slug': 'titanic'});
 
         expect(merged.customParameters, {'slug': 'titanic'});
       });
@@ -209,7 +218,9 @@ void main() {
         );
 
         expect(
-            identical(resolved.mergingUrlParameters(null), resolved), isTrue);
+          identical(resolved.mergingUrlParameters(null), resolved),
+          isTrue,
+        );
         expect(identical(resolved.mergingUrlParameters({}), resolved), isTrue);
       });
 
@@ -225,8 +236,10 @@ void main() {
         expect(merged.linkId, 'link-1');
         expect(merged.deepLinkPath, '/product/1');
         expect(merged.appScheme, 'myapp');
-        expect(merged.androidURL,
-            'https://play.google.com/store/apps/details?id=com.app');
+        expect(
+          merged.androidURL,
+          'https://play.google.com/store/apps/details?id=com.app',
+        );
       });
     });
   });

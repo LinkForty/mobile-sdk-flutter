@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i3;
 
 import 'package:linkforty_flutter/storage/storage_manager.dart' as _i2;
@@ -33,55 +34,34 @@ class MockSharedPreferencesProtocol extends _i1.Mock
   }
 
   @override
-  _i3.Future<bool> setString(
-    String? key,
-    String? value,
-  ) =>
+  _i3.Future<bool> setString(String? key, String? value) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setString,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(#setString, [key, value]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  String? getString(String? key) => (super.noSuchMethod(Invocation.method(
-        #getString,
-        [key],
-      )) as String?);
+  String? getString(String? key) =>
+      (super.noSuchMethod(Invocation.method(#getString, [key])) as String?);
 
   @override
-  _i3.Future<bool> setBool(
-    String? key,
-    bool? value,
-  ) =>
+  _i3.Future<bool> setBool(String? key, bool? value) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setBool,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(#setBool, [key, value]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  bool? getBool(String? key) => (super.noSuchMethod(Invocation.method(
-        #getBool,
-        [key],
-      )) as bool?);
+  bool? getBool(String? key) =>
+      (super.noSuchMethod(Invocation.method(#getBool, [key])) as bool?);
 
   @override
-  _i3.Future<bool> remove(String? key) => (super.noSuchMethod(
-        Invocation.method(
-          #remove,
-          [key],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+  _i3.Future<bool> remove(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#remove, [key]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 }

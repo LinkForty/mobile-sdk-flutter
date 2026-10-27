@@ -42,8 +42,8 @@ class FingerprintCollector implements FingerprintCollectorProtocol {
   /// - [deviceInfo]: Device info plugin instance
   /// - [packageInfo]: Package info (if already loaded)
   FingerprintCollector({DeviceInfoPlugin? deviceInfo, PackageInfo? packageInfo})
-      : _deviceInfo = deviceInfo ?? DeviceInfoPlugin(),
-        _packageInfo = packageInfo;
+    : _deviceInfo = deviceInfo ?? DeviceInfoPlugin(),
+      _packageInfo = packageInfo;
 
   /// Collects a [DeviceFingerprint] containing properties like screen size,
   /// timezone, language, and platform version.

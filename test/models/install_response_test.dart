@@ -224,13 +224,17 @@ void main() {
       expect(res1, isNot(equals(res3)));
       expect(
         res1,
-        isNot(equals(InstallResponse(
-          installId: '1',
-          attributed: true,
-          confidenceScore: 10,
-          matchedFactors: ['a'],
-          competingLinks: 1,
-        ))),
+        isNot(
+          equals(
+            InstallResponse(
+              installId: '1',
+              attributed: true,
+              confidenceScore: 10,
+              matchedFactors: ['a'],
+              competingLinks: 1,
+            ),
+          ),
+        ),
       );
     });
   });
