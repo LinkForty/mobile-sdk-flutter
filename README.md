@@ -4,7 +4,7 @@
 **Native Flutter SDK for deep linking, mobile attribution, and conversion tracking.**
 
 [![Pub Version](https://img.shields.io/pub/v/linkforty_flutter.svg)](https://pub.dev/packages/linkforty_flutter)
-[![Flutter](https://img.shields.io/badge/Flutter-3.10+-02569B.svg)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.38+-02569B.svg)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## Features
@@ -16,16 +16,18 @@
 - **Last-Click Attribution**: In-app events are automatically credited to the deep link that most recently opened the app
 - **Screen-Flow Tracking**: Report screen views (manually or automatically via a `NavigatorObserver`) to see what users do after clicking a link
 - **Offline Support**: Queue events when offline with automatic retry
-- **Privacy-First**: No IDFA/GAID collection by default, complies with privacy requirements
+- **Privacy-First**: Never collects IDFA or GAID, and never shows the App Tracking Transparency prompt
 - **Programmatic Link Creation**: Create short links directly from your app
 - **Pure Dart/Flutter**: 100% Dart, standard `Future`/`Stream` APIs
 
 ## Requirements
 
-- Flutter 3.10+
-- Dart 3.0+
-- iOS 12.0+
-- Android API 21+
+- Flutter 3.38.1+
+- Dart 3.10+
+- iOS 13.0+
+- Android API 24+ (`minSdk 24`)
+
+These follow from the SDK's dependencies: every version of `app_links` it accepts needs iOS 13 and Android API 24, and the oldest needs Flutter 3.38.1.
 
 ## Installation
 
@@ -46,7 +48,7 @@ flutter pub add linkforty_flutter
 
 ### 1. Initialize the SDK
 
-Initialize the SDK in your `main.dart` or early in your app lifecycle.
+Initialize the SDK once, in your `main.dart` or early in your app lifecycle.
 
 ```dart
 import 'package:linkforty_flutter/linkforty_flutter.dart';
@@ -57,8 +59,13 @@ void main() async {
   // Initialize LinkForty
   try {
     final config = LinkFortyConfig(
-      baseURL: Uri.parse('https://go.yourdomain.com'),
-      apiKey: 'your-api-key', // Optional for self-hosted
+      // Your LinkForty server: https://api.linkforty.com on the hosted service,
+      // or the URL of your own LinkForty Core server.
+      baseURL: Uri.parse('https://api.linkforty.com'),
+      // Your workspace's app token. Required on the hosted service: it limits
+      // install matching to your own links. Safe to ship in the app.
+      appToken: 'at_your_app_token',
+      apiKey: 'your-api-key', // Only needed to create links from the app (createLink)
       debug: true, // Enable debug logging
       attributionWindowHours: 168, // 7 days
     );
@@ -132,7 +139,7 @@ The SDK listens for incoming links itself (via `app_links`), including the link 
 
 You don't need your own `app_links` listener. If you have one from an earlier version, remove it; if you keep it, the SDK ignores the same URL passed to `handleDeepLink()` again within 10 seconds. Use `handleDeepLink()` for links that reach the app some other way, such as a push notification payload.
 
-If you also use Flutter's built-in deep linking, set `flutter_deeplinking_enabled` to `false` in `AndroidManifest.xml` (and `FlutterDeepLinkingEnabled` to `NO` in `Info.plist`) so the router doesn't also try to open the link's path.
+**Turn off Flutter's built-in deep linking** (see [Platform Setup](#turn-off-flutters-built-in-deep-linking)). Since Flutter 3.27 it's on by default and conflicts with `app_links`: Flutter would also hand each link's path to your router, so a short link's `/abc123` opens a route that doesn't exist. With it off, all links, including your app's own, arrive through `onDeepLink`.
 
 ```dart
 // Handle deep links when app is running or opened from background
@@ -223,6 +230,23 @@ print("Share this link: ${result.url}");
 
 ## Platform Setup
 
+### Turn off Flutter's built-in deep linking
+
+Since Flutter 3.27, Flutter's own deep link handling is on by default. Flutter's [breaking-change note](https://docs.flutter.dev/release/breaking-changes/deep-links-flag-change) says apps using a link package such as `app_links`, which this SDK uses, must opt out:
+
+**Android**, inside the `<activity>` element of `AndroidManifest.xml`:
+
+```xml
+<meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+```
+
+**iOS**, in `ios/Runner/Info.plist`:
+
+```xml
+<key>FlutterDeepLinkingEnabled</key>
+<false/>
+```
+
 ### Android
 
 1.  **AndroidManifest.xml**: Add the intent filters for App Links (HTTPS) and Custom Schemes.
@@ -247,7 +271,8 @@ print("Share this link: ${result.url}");
 </activity>
 ```
 
-2.  **Asset Links**: Ensure your `.well-known/assetlinks.json` is hosted on your domain.
+2.  **Asset Links**: Ensure your `.well-known/assetlinks.json` is hosted on your domain, listing your package name and signing certificate's SHA-256 fingerprint. For Play Store builds, use the fingerprint from Play Console → App integrity: Google re-signs your app.
+3.  **minSdk**: set `minSdk = 24` (or higher) in `android/app/build.gradle`.
 
 ### iOS
 
@@ -265,7 +290,6 @@ If you're running your own LinkForty Core instance:
 ```dart
 final config = LinkFortyConfig(
   baseURL: Uri.parse('https://links.yourcompany.com'),
-  apiKey: null, // No API key needed for self-hosted
   debug: false,
 );
 await LinkForty.initialize(config: config);
@@ -312,18 +336,21 @@ LinkForty.instance.reset();
 
 ### Privacy-First Design
 
-- **No Persistent IDs**: Uses probabilistic fingerprinting only.
+- **No advertising IDs**: Never collects IDFA or GAID, and never shows the App Tracking Transparency prompt.
+- **How installs are matched**: on Android, from the Google Play install referrer when the install came from a link to Google Play; otherwise by probabilistic fingerprinting of the signals below.
+- **Install ID**: The SDK stores the install ID your server assigns when the install is reported, to tie your app's events to that install. `clearData()` deletes it, with any cached attribution and queued events.
 - **Data Minimization**: Collects only necessary attribution data.
-- **User Control**: Provides `clearData()` for user data deletion.
 
 ### Data Collected (for attribution only)
 
 - Device timezone
 - Device language
 - Screen resolution
-- OS version (Android/iOS)
+- Platform and OS version (Android/iOS)
 - App version
 - User-Agent string
+- The Google Play install referrer (Android, on the launch that reports the install)
+- A device ID, only if your app passes one to `initialize(deviceId: ...)`
 
 ### HTTPS Required
 
