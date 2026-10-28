@@ -80,7 +80,9 @@ void main() {
     http.error = const SocketLikeException();
     for (final name in ['first', 'second']) {
       await expectLater(
-          () => tracker.trackEvent(name), throwsA(isA<NetworkError>()));
+        () => tracker.trackEvent(name),
+        throwsA(isA<NetworkError>()),
+      );
     }
     expect(queue.count, 2);
 
@@ -96,10 +98,20 @@ void main() {
 
   test('a queued event that still fails keeps its place at the head', () async {
     queue
-      ..enqueue(EventRequest(
-          installId: 'install-1', eventName: 'first', eventData: const {}))
-      ..enqueue(EventRequest(
-          installId: 'install-1', eventName: 'second', eventData: const {}));
+      ..enqueue(
+        EventRequest(
+          installId: 'install-1',
+          eventName: 'first',
+          eventData: const {},
+        ),
+      )
+      ..enqueue(
+        EventRequest(
+          installId: 'install-1',
+          eventName: 'second',
+          eventData: const {},
+        ),
+      );
     http.status = 503;
     http.body = '{"error":"unavailable"}';
 
@@ -112,35 +124,51 @@ void main() {
     http.status = 404;
     http.body = '{"error":"Install not found"}';
 
-    await expectLater(() => tracker.trackEvent('purchase'),
-        throwsA(isA<InvalidResponseError>()));
-
-    expect(queue.count, 0);
-  });
-
-  test('a queued event the server rejects is dropped and the rest are sent',
-      () async {
-    queue
-      ..enqueue(EventRequest(
-          installId: 'gone', eventName: 'rejected', eventData: const {}))
-      ..enqueue(EventRequest(
-          installId: 'install-1', eventName: 'kept', eventData: const {}));
-    final client = _FirstRejected(http);
-
-    final rejecting = EventTracker(
-      networkManager: NetworkManager(
-        config: LinkFortyConfig(baseURL: Uri.parse('https://api.example.com')),
-        httpClient: client,
-      ),
-      storageManager: storage,
-      attributionContext: AttributionContext(storage: storage),
-      eventQueue: queue,
+    await expectLater(
+      () => tracker.trackEvent('purchase'),
+      throwsA(isA<InvalidResponseError>()),
     );
-    await rejecting.flushQueue();
 
-    expect(client.sent, ['rejected', 'kept']);
     expect(queue.count, 0);
   });
+
+  test(
+    'a queued event the server rejects is dropped and the rest are sent',
+    () async {
+      queue
+        ..enqueue(
+          EventRequest(
+            installId: 'gone',
+            eventName: 'rejected',
+            eventData: const {},
+          ),
+        )
+        ..enqueue(
+          EventRequest(
+            installId: 'install-1',
+            eventName: 'kept',
+            eventData: const {},
+          ),
+        );
+      final client = _FirstRejected(http);
+
+      final rejecting = EventTracker(
+        networkManager: NetworkManager(
+          config: LinkFortyConfig(
+            baseURL: Uri.parse('https://api.example.com'),
+          ),
+          httpClient: client,
+        ),
+        storageManager: storage,
+        attributionContext: AttributionContext(storage: storage),
+        eventQueue: queue,
+      );
+      await rejecting.flushQueue();
+
+      expect(client.sent, ['rejected', 'kept']);
+      expect(queue.count, 0);
+    },
+  );
 }
 
 /// A connection-level failure, as the HTTP client reports when offline.
@@ -164,6 +192,8 @@ class _FirstRejected implements HttpClient {
     sent.add(jsonDecode(utf8.decode(body!))['eventName'] as String);
     final status = sent.length == 1 ? 404 : 200;
     return HttpResponse(
-        statusCode: status, body: Uint8List.fromList(utf8.encode(_inner.body)));
+      statusCode: status,
+      body: Uint8List.fromList(utf8.encode(_inner.body)),
+    );
   }
 }

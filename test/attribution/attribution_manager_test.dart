@@ -307,13 +307,14 @@ void main() {
 
     Map<String, dynamic> sentBody() {
       return verify(
-        mockNetworkManager.request<InstallResponse>(
-          endpoint: '/api/sdk/v1/install',
-          method: HttpMethod.post,
-          body: captureAnyNamed('body'),
-          fromJson: anyNamed('fromJson'),
-        ),
-      ).captured.single as Map<String, dynamic>;
+            mockNetworkManager.request<InstallResponse>(
+              endpoint: '/api/sdk/v1/install',
+              method: HttpMethod.post,
+              body: captureAnyNamed('body'),
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).captured.single
+          as Map<String, dynamic>;
     }
 
     test('is sent with the fingerprint', () async {

@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i4;
 import 'dart:typed_data' as _i6;
 
@@ -27,13 +28,8 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakeHttpResponse_0 extends _i1.SmartFake implements _i2.HttpResponse {
-  _FakeHttpResponse_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeHttpResponse_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [HttpClient].
@@ -52,28 +48,23 @@ class MockHttpClient extends _i1.Mock implements _i3.HttpClient {
     Map<String, String>? headers,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #execute,
-          [],
-          {
-            #url: url,
-            #method: method,
-            #body: body,
-            #headers: headers,
-          },
-        ),
-        returnValue: _i4.Future<_i2.HttpResponse>.value(_FakeHttpResponse_0(
-          this,
-          Invocation.method(
-            #execute,
-            [],
-            {
+            Invocation.method(#execute, [], {
               #url: url,
               #method: method,
               #body: body,
               #headers: headers,
-            },
-          ),
-        )),
-      ) as _i4.Future<_i2.HttpResponse>);
+            }),
+            returnValue: _i4.Future<_i2.HttpResponse>.value(
+              _FakeHttpResponse_0(
+                this,
+                Invocation.method(#execute, [], {
+                  #url: url,
+                  #method: method,
+                  #body: body,
+                  #headers: headers,
+                }),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.HttpResponse>);
 }

@@ -39,10 +39,10 @@ class EventTracker implements EventTrackerProtocol {
     required StorageManagerProtocol storageManager,
     required AttributionContext attributionContext,
     EventQueue? eventQueue,
-  })  : _networkManager = networkManager,
-        _storageManager = storageManager,
-        _attributionContext = attributionContext,
-        _eventQueue = eventQueue ?? EventQueue() {
+  }) : _networkManager = networkManager,
+       _storageManager = storageManager,
+       _attributionContext = attributionContext,
+       _eventQueue = eventQueue ?? EventQueue() {
     // Restore any events that were persisted before the last app session
     _restorePersistedQueue();
   }
@@ -180,7 +180,8 @@ class EventTracker implements EventTrackerProtocol {
           _eventQueue.requeueFront([event]);
           await _persistQueue();
           LinkFortyLogger.log(
-              'Failed to send queued event, keeping it queued: $e');
+            'Failed to send queued event, keeping it queued: $e',
+          );
           return;
         }
         await _persistQueue();

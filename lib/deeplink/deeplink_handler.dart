@@ -193,8 +193,8 @@ class DeepLinkHandler {
 
     final resolvedData =
         (_networkManager != null && _fingerprintCollector != null)
-            ? await _resolveUrl(uri, fallback: localData)
-            : localData;
+        ? await _resolveUrl(uri, fallback: localData)
+        : localData;
 
     final callbacks = List<DeepLinkCallback>.from(_deepLinkCallbacks);
 

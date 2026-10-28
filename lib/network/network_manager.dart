@@ -39,8 +39,8 @@ class NetworkManager implements NetworkManagerProtocol {
   static const int _maxRetries = 3;
 
   NetworkManager({required LinkFortyConfig config, HttpClient? httpClient})
-      : _config = config,
-        _httpClient = httpClient ?? HttpClientImpl();
+    : _config = config,
+      _httpClient = httpClient ?? HttpClientImpl();
 
   /// Performs an asynchronous network request and decodes the JSON response.
   ///

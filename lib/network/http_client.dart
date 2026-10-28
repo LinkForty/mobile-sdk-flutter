@@ -43,8 +43,9 @@ class HttpClientImpl implements HttpClient {
     try {
       switch (method) {
         case HttpMethod.get:
-          response =
-              await _client.get(uri, headers: requestHeaders).timeout(timeout);
+          response = await _client
+              .get(uri, headers: requestHeaders)
+              .timeout(timeout);
           break;
         case HttpMethod.post:
           response = await _client

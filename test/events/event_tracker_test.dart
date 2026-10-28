@@ -72,8 +72,9 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async =>
-          const EventResponse(eventId: 'evt-1', acknowledged: true));
+      ).thenAnswer(
+        (_) async => const EventResponse(eventId: 'evt-1', acknowledged: true),
+      );
 
       await eventTracker.trackEvent('test', {'key': 'value'});
 
@@ -97,8 +98,9 @@ void main() {
 
     test('trackEvent stamps the active last-click attribution', () async {
       when(mockStorageManager.getInstallId()).thenReturn('inst_1');
-      when(mockStorageManager.saveAttribution(any))
-          .thenAnswer((_) async => true);
+      when(
+        mockStorageManager.saveAttribution(any),
+      ).thenAnswer((_) async => true);
       when(
         mockNetworkManager.request<EventResponse>(
           endpoint: anyNamed('endpoint'),
@@ -106,8 +108,9 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async =>
-          const EventResponse(eventId: 'evt-1', acknowledged: true));
+      ).thenAnswer(
+        (_) async => const EventResponse(eventId: 'evt-1', acknowledged: true),
+      );
 
       // A deep link opens the app, then the user does something.
       await attributionContext.recordDeepLinkOpen(
@@ -136,41 +139,49 @@ void main() {
       ).called(1);
     });
 
-    test('trackScreenView emits a screen_view with screen/previousScreen',
-        () async {
-      when(mockStorageManager.getInstallId()).thenReturn('inst_1');
-      when(
-        mockNetworkManager.request<EventResponse>(
-          endpoint: anyNamed('endpoint'),
-          method: anyNamed('method'),
-          body: anyNamed('body'),
-          fromJson: anyNamed('fromJson'),
-        ),
-      ).thenAnswer((_) async =>
-          const EventResponse(eventId: 'evt-1', acknowledged: true));
-
-      await eventTracker.trackScreenView('Home');
-      await eventTracker.trackScreenView('ProductDetail');
-
-      verify(
-        mockNetworkManager.request<EventResponse>(
-          endpoint: '/api/sdk/v1/event',
-          method: HttpMethod.post,
-          body: argThat(
-            isA<EventRequest>()
-                .having((e) => e.eventName, 'eventName', 'screen_view')
-                .having((e) => e.eventData['screen'], 'screen', 'ProductDetail')
-                .having(
-                  (e) => e.eventData['previousScreen'],
-                  'previousScreen',
-                  'Home',
-                ),
-            named: 'body',
+    test(
+      'trackScreenView emits a screen_view with screen/previousScreen',
+      () async {
+        when(mockStorageManager.getInstallId()).thenReturn('inst_1');
+        when(
+          mockNetworkManager.request<EventResponse>(
+            endpoint: anyNamed('endpoint'),
+            method: anyNamed('method'),
+            body: anyNamed('body'),
+            fromJson: anyNamed('fromJson'),
           ),
-          fromJson: anyNamed('fromJson'),
-        ),
-      ).called(1);
-    });
+        ).thenAnswer(
+          (_) async =>
+              const EventResponse(eventId: 'evt-1', acknowledged: true),
+        );
+
+        await eventTracker.trackScreenView('Home');
+        await eventTracker.trackScreenView('ProductDetail');
+
+        verify(
+          mockNetworkManager.request<EventResponse>(
+            endpoint: '/api/sdk/v1/event',
+            method: HttpMethod.post,
+            body: argThat(
+              isA<EventRequest>()
+                  .having((e) => e.eventName, 'eventName', 'screen_view')
+                  .having(
+                    (e) => e.eventData['screen'],
+                    'screen',
+                    'ProductDetail',
+                  )
+                  .having(
+                    (e) => e.eventData['previousScreen'],
+                    'previousScreen',
+                    'Home',
+                  ),
+              named: 'body',
+            ),
+            fromJson: anyNamed('fromJson'),
+          ),
+        ).called(1);
+      },
+    );
 
     test('trackScreenView throws on an empty name', () async {
       await expectLater(
@@ -221,8 +232,9 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async =>
-          const EventResponse(eventId: 'evt-1', acknowledged: true));
+      ).thenAnswer(
+        (_) async => const EventResponse(eventId: 'evt-1', acknowledged: true),
+      );
 
       await eventTracker.trackRevenue(amount: 10.0, currency: 'USD');
 
@@ -274,8 +286,9 @@ void main() {
           body: anyNamed('body'),
           fromJson: anyNamed('fromJson'),
         ),
-      ).thenAnswer((_) async =>
-          const EventResponse(eventId: 'evt-1', acknowledged: true));
+      ).thenAnswer(
+        (_) async => const EventResponse(eventId: 'evt-1', acknowledged: true),
+      );
 
       await eventTracker.flushQueue();
 
@@ -352,8 +365,7 @@ void main() {
       },
     );
 
-    test('EventTracker loads persisted queue from storage on creation',
-        () async {
+    test('EventTracker loads persisted queue from storage on creation', () async {
       final persistedEvent = EventRequest(
         installId: 'inst_1',
         eventName: 'persisted',

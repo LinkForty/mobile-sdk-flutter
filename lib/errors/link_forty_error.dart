@@ -18,7 +18,7 @@ abstract class LinkFortyError implements Exception {
 /// Call `LinkForty.instance.initialize(config:)` before using other SDK methods
 class NotInitializedError extends LinkFortyError {
   const NotInitializedError()
-      : super('LinkForty SDK is not initialized. Call initialize() first.');
+    : super('LinkForty SDK is not initialized. Call initialize() first.');
 }
 
 /// The SDK has already been initialized
@@ -26,19 +26,19 @@ class NotInitializedError extends LinkFortyError {
 /// `initialize(config:)` can only be called once
 class AlreadyInitializedError extends LinkFortyError {
   const AlreadyInitializedError()
-      : super('LinkForty SDK has already been initialized.');
+    : super('LinkForty SDK has already been initialized.');
 }
 
 /// The configuration is invalid
 class InvalidConfigurationError extends LinkFortyError {
   InvalidConfigurationError(String detail)
-      : super('Invalid configuration: $detail');
+    : super('Invalid configuration: $detail');
 }
 
 /// A network error occurred
 class NetworkError extends LinkFortyError {
   NetworkError(Object cause)
-      : super('Network error: ${_extractMessage(cause)}', cause);
+    : super('Network error: ${_extractMessage(cause)}', cause);
 
   static String _extractMessage(Object error) {
     if (error is Exception) {
@@ -54,7 +54,7 @@ class InvalidResponseError extends LinkFortyError {
   final String? responseMessage;
 
   InvalidResponseError({this.statusCode, this.responseMessage})
-      : super(_buildMessage(statusCode, responseMessage));
+    : super(_buildMessage(statusCode, responseMessage));
 
   static String _buildMessage(int? statusCode, String? responseMessage) {
     final buffer = StringBuffer('Invalid server response');
@@ -71,7 +71,7 @@ class InvalidResponseError extends LinkFortyError {
 /// Failed to decode the response
 class DecodingError extends LinkFortyError {
   DecodingError(Object cause)
-      : super('Failed to decode response: ${_extractMessage(cause)}', cause);
+    : super('Failed to decode response: ${_extractMessage(cause)}', cause);
 
   static String _extractMessage(Object error) {
     if (error is Exception) {
@@ -84,7 +84,7 @@ class DecodingError extends LinkFortyError {
 /// Failed to encode the request
 class EncodingError extends LinkFortyError {
   EncodingError(Object cause)
-      : super('Failed to encode request: ${_extractMessage(cause)}', cause);
+    : super('Failed to encode request: ${_extractMessage(cause)}', cause);
 
   static String _extractMessage(Object error) {
     if (error is Exception) {
@@ -102,21 +102,21 @@ class InvalidEventDataError extends LinkFortyError {
 /// Invalid deep link URL
 class InvalidDeepLinkUrlError extends LinkFortyError {
   InvalidDeepLinkUrlError(String detail)
-      : super('Invalid deep link URL: $detail');
+    : super('Invalid deep link URL: $detail');
 }
 
 /// API key is required for this operation
 class MissingApiKeyError extends LinkFortyError {
   const MissingApiKeyError()
-      : super(
-          'API key is required for this operation. Provide an apiKey in LinkFortyConfig.',
-        );
+    : super(
+        'API key is required for this operation. Provide an apiKey in LinkFortyConfig.',
+      );
 }
 
 /// Template ID is required for link creation
 class MissingTemplateIdError extends LinkFortyError {
   const MissingTemplateIdError()
-      : super(
-          'A template ID is required for link creation. Provide a templateId in CreateLinkOptions.',
-        );
+    : super(
+        'A template ID is required for link creation. Provide a templateId in CreateLinkOptions.',
+      );
 }

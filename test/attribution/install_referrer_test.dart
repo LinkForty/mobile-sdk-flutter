@@ -22,20 +22,26 @@ void main() {
 
     test('returns the referrer Play recorded', () async {
       expect(
-          await PlayInstallReferrer.read(
-              isAndroid: true, query: () async => referrer),
-          referrer);
+        await PlayInstallReferrer.read(
+          isAndroid: true,
+          query: () async => referrer,
+        ),
+        referrer,
+      );
     });
 
     test('returns null for an empty referrer', () async {
       expect(
-          await PlayInstallReferrer.read(
-              isAndroid: true, query: () async => ' '),
-          isNull);
+        await PlayInstallReferrer.read(isAndroid: true, query: () async => ' '),
+        isNull,
+      );
       expect(
-          await PlayInstallReferrer.read(
-              isAndroid: true, query: () async => null),
-          isNull);
+        await PlayInstallReferrer.read(
+          isAndroid: true,
+          query: () async => null,
+        ),
+        isNull,
+      );
     });
 
     test('asks once more after a failed read', () async {
@@ -87,8 +93,10 @@ void main() {
             Future<String?>.delayed(const Duration(seconds: 5), () => referrer),
       );
       expect(value, isNull);
-      expect(DateTime.now().difference(started),
-          lessThan(const Duration(seconds: 1)));
+      expect(
+        DateTime.now().difference(started),
+        lessThan(const Duration(seconds: 1)),
+      );
     });
   });
 }

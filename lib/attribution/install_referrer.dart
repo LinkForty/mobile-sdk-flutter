@@ -37,10 +37,12 @@ class PlayInstallReferrer {
     bool? isAndroid,
     Duration timeout = defaultTimeout,
   }) async {
-    final android = isAndroid ??
+    final android =
+        isAndroid ??
         (!kIsWeb && defaultTargetPlatform == TargetPlatform.android);
     if (!android) return null;
-    final ask = query ??
+    final ask =
+        query ??
         () async =>
             (await AndroidPlayInstallReferrer.installReferrer).installReferrer;
 
