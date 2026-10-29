@@ -16,5 +16,5 @@ class SdkInfo {
   static const String name = 'flutter';
 
   /// SDK release version, sent as `sdkVersion`. Keep in sync with pubspec.yaml.
-  static const String version = '0.6.0';
+  static const String version = '0.6.1';
 }
