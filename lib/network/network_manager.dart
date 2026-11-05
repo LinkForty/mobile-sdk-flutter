@@ -125,6 +125,13 @@ class NetworkManager implements NetworkManagerProtocol {
       requestHeaders['Authorization'] = 'Bearer ${_config.apiKey}';
     }
 
+    // Identify the workspace on every request, so link lookups are limited to
+    // its links and an event can name it. Self-hosted Core doesn't use it.
+    final appToken = _config.appToken;
+    if (appToken != null && appToken.isNotEmpty) {
+      requestHeaders['X-LinkForty-App-Token'] = appToken;
+    }
+
     // Add custom headers
     if (headers != null) {
       requestHeaders.addAll(headers);
