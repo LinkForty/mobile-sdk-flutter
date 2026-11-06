@@ -128,6 +128,61 @@ void main() {
       expect(headers['X-LinkForty-SDK'], '${SdkInfo.name}/${SdkInfo.version}');
     });
 
+    group('app token header', () {
+      Future<Map<String, String>> sentHeaders(String? appToken) async {
+        config = LinkFortyConfig(
+          baseURL: Uri.parse('https://example.com'),
+          appToken: appToken,
+        );
+        networkManager = NetworkManager(
+          config: config,
+          httpClient: mockHttpClient,
+        );
+        when(
+          mockHttpClient.execute(
+            url: anyNamed('url'),
+            method: anyNamed('method'),
+            headers: anyNamed('headers'),
+            body: anyNamed('body'),
+          ),
+        ).thenAnswer(
+          (_) async => HttpResponse(
+            statusCode: 200,
+            body: Uint8List.fromList(utf8.encode('{}')),
+          ),
+        );
+        await networkManager.request<Map<String, dynamic>>(
+          endpoint: '/test',
+          method: HttpMethod.get,
+          fromJson: (json) => json,
+        );
+        return verify(
+              mockHttpClient.execute(
+                url: anyNamed('url'),
+                method: anyNamed('method'),
+                headers: captureAnyNamed('headers'),
+                body: anyNamed('body'),
+              ),
+            ).captured.first
+            as Map<String, String>;
+      }
+
+      test('is sent when the app token is set', () async {
+        final headers = await sentHeaders('at_token');
+        expect(headers['X-LinkForty-App-Token'], 'at_token');
+      });
+
+      test('is left out without an app token', () async {
+        final headers = await sentHeaders(null);
+        expect(headers.containsKey('X-LinkForty-App-Token'), isFalse);
+      });
+
+      test('is left out for an empty app token', () async {
+        final headers = await sentHeaders('');
+        expect(headers.containsKey('X-LinkForty-App-Token'), isFalse);
+      });
+    });
+
     test('retries on failure', () async {
       // Fail twice, then succeed
       int callCount = 0;
