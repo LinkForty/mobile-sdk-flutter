@@ -1,3 +1,7 @@
+## 0.6.2
+
+* **App token on every request.** With `appToken` set, the SDK now sends it as the `X-LinkForty-App-Token` header on every request, as the other LinkForty SDKs do. A server that uses it can limit link lookups to the app's own workspace and identify the app on events. Without a token, nothing changes. Self-hosted Core doesn't use it.
+
 ## 0.6.1
 
 * **Corrected minimums.** `pubspec.yaml` now states the Flutter and Dart versions the SDK actually needs: Flutter 3.38.1+ and Dart 3.10+ (it said Flutter 3.10 and Dart 3.0). The oldest versions of `app_links`, `device_info_plus` and `package_info_plus` the SDK accepts already required them, so an older toolchain could not resolve the package; nothing changes for an app that builds today. Apps need iOS 13+ and Android API 24+ (`minSdk 24`), which every accepted `app_links` version requires. The example app sets `platform :ios, '13.0'` and `minSdk = 24` explicitly.

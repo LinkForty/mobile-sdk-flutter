@@ -64,6 +64,7 @@ void main() async {
       baseURL: Uri.parse('https://api.linkforty.com'),
       // Your workspace's app token. Required on the hosted service: it limits
       // install matching to your own links. Safe to ship in the app.
+      // Self-hosted Core doesn't use it.
       appToken: 'at_your_app_token',
       apiKey: 'your-api-key', // Only needed to create links from the app (createLink)
       debug: true, // Enable debug logging
