@@ -1,3 +1,7 @@
+// Flutter is moving Material to package:material_ui and deprecates this
+// import from 3.47. The example keeps it so it builds on every Flutter
+// version the package supports (3.38.1 and later).
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:linkforty_flutter/linkforty_flutter.dart';
 
