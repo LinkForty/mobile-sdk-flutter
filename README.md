@@ -157,7 +157,7 @@ LinkForty.instance.onDeepLink((uri, deepLinkData) {
 });
 ```
 
-> **Server-side resolution:** When the SDK is initialized, deep links are automatically resolved via the server to provide enriched data including `deepLinkPath`, `appScheme`, and `linkId`. If the server is unreachable, the SDK falls back to local URL parsing.
+> **Server-side resolution:** When the SDK is initialized, deep links are automatically resolved via the server to provide enriched data including `deepLinkPath`, `appScheme`, and `linkId`. The link's query parameters go along with the request, so the click is recorded with the same parameters a browser click of the link would carry. If the server is unreachable, the SDK falls back to local URL parsing.
 
 ### 4. Track Events
 
@@ -354,6 +354,8 @@ LinkForty.instance.reset();
 - User-Agent string
 - The Google Play install referrer (Android, on the launch that reports the install)
 - A device ID, only if your app passes one to `initialize(deviceId: ...)`
+
+When a link that opened the app is resolved, the SDK sends the link's path and query parameters with the time zone, language, screen resolution, platform and OS version.
 
 ### HTTPS Required
 

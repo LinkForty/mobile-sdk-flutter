@@ -266,8 +266,18 @@ class DeepLinkHandler {
       deviceId: null,
     );
 
+    // The link's own query parameters go along, as they would on a browser
+    // click of the same link. Fingerprint parameters are the SDK's to set.
+    final linkParams = <String, String>{
+      for (final entry in uri.queryParameters.entries)
+        if (entry.value.isNotEmpty &&
+            !entry.key.toLowerCase().startsWith('fp_'))
+          entry.key: entry.value,
+    };
+
     // Build query parameters
     final queryParams = {
+      ...linkParams,
       'fp_tz': fingerprint.timezone,
       'fp_lang': fingerprint.language,
       'fp_sw': fingerprint.screenWidth.toString(),
