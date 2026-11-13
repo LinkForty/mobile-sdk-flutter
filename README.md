@@ -170,7 +170,7 @@ await LinkForty.instance.trackEvent(
   'purchase',
   {
     'product_id': '123',
-    'amount': 29.99,
+    'revenue': 29.99,
     'currency': 'USD',
   },
 );
@@ -184,6 +184,8 @@ await LinkForty.instance.trackRevenue(
 ```
 
 Every event is automatically stamped with the deep link that most recently opened the app (last-click attribution), so the dashboard can show what users do *after* clicking a link. Events with no preceding deep-link open are reported as organic. No extra code is required.
+
+To count an event as revenue, put the amount in a `revenue` property, with an ISO 4217 `currency` code. Revenue reports read only `revenue`: an amount under any other name, such as `amount` or `price`, is stored with the event but not counted. `trackRevenue` does this for you.
 
 ### 5. Track Screen Views
 
