@@ -35,7 +35,7 @@ Add the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  linkforty_flutter: ^0.6.0
+  linkforty_flutter: ^0.7.0
 ```
 
 Or run:
