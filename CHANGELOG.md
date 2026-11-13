@@ -1,3 +1,8 @@
+## 0.7.0
+
+* **Link parameters on direct opens.** When a LinkForty link opens the app, the resolve request now carries the link's own query parameters along with the fingerprint, so the click is recorded with the same parameters a browser click of the link would carry: its UTM tags, and any other parameter the server reads. A literal `+` in the link is read as a space and `%2B` as `+`, as a server reads them. The SDK's own `fp_` values replace any `fp_` parameter on the link, and empty parameters are left out. A server that ignores extra parameters behaves as before.
+* README: the `trackEvent` purchase example puts its amount in `revenue`, the property revenue reports read, and says so.
+
 ## 0.6.2
 
 * **App token on every request.** With `appToken` set, the SDK now sends it as the `X-LinkForty-App-Token` header on every request, as the other LinkForty SDKs do. A server that uses it can limit link lookups to the app's own workspace and identify the app on events. Without a token, nothing changes. Self-hosted Core doesn't use it.
